@@ -187,6 +187,38 @@ sampleButtons = function () {
             image6.src = linkPrefix + "images/white.png"; //alpha
 
         }
+
+
+        if ($(this).text() === "Holmer") {
+            initParameters();
+
+            //Buddha
+            alphaR = 1;
+            image1.src = linkPrefix + "images/Holmer/Holmer_new_dark.png";//dark
+            image2.src = linkPrefix + "images/Holmer/Holmer_new_bright.png";//bright
+            image3.src = linkPrefix + "images/Holmer/Holmer_new_shape.png"; //shape map
+            image4.src = linkPrefix + "images/dark.png";  //reflection
+            image5.src = linkPrefix + "images/dark.jpg";  //refraction
+            image6.src = linkPrefix + "images/Holmer/Holmer_new_alphaControl.png"; //alpha
+
+
+        }
+
+        if ($(this).text() === "EscherEye") {
+            initParameters();
+
+            //Buddha
+            alphaR = 0.2;
+            image1.src = linkPrefix + "images/Escher/eye/dark.jpg";//dark
+            image2.src = linkPrefix + "images/Escher/eye/bright.jpg";//bright
+            image3.src = linkPrefix + "images/Escher/eye/shape.png"; //shape map
+            image4.src = linkPrefix + "images/Escher/eye/reflect.png";  //reflection
+            image5.src = linkPrefix + "images/Escher/eye/dark.jpg";  //refraction
+            image6.src = linkPrefix + "images/Escher/eye/alphaControl.jpg"; //alpha
+
+
+        }
+
         /*if($(this).text() ==="Jar")
         {
             //initParameters();
