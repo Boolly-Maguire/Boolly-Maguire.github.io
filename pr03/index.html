@@ -394,7 +394,7 @@
         vec3 fresnelBlend2(vec3 n, vec3 refl, vec3 refr) {
             float cos = dot(n, vec3(0, 0, 1.0));
             float ior = pow(2.0, logIOR);
-
+            ior = 1.0 / ior;
 
             float rs = (ior * cos - sqrt(1.0 - ior * ior * (1.0 - cos * cos))) / (ior * cos + sqrt(1.0 - ior * ior * (1.0 - cos * cos)));
             rs = rs * rs;
@@ -403,13 +403,13 @@
             rp = rp * rp;
 
 
-            float fresnel;
+            float fresnel = (rs + rp) / 2.0;
 
-            if (checkRs) {
-                fresnel = rs;
-            } else {
-                fresnel = rp;
-            }
+//            if (checkRs) {
+//                fresnel = rs;
+//            } else {
+//                fresnel = rp;
+//            }
 
 
 //            if (fresnelIntensity > 0.0) {
@@ -893,15 +893,15 @@
                                             </div>
                                         </label>
                                     </div>
-                                    <div class="checkbox">
-                                        <label>
-                                            <span class="h6 inlineBlock"> Rs (else Rp) </span>
-                                            <div class="checkbox_container pull-right">
-                                                <input type="checkbox" id="checkRsSelect">
-                                                <div class="pseudoCheckbox"></div>
-                                            </div>
-                                        </label>
-                                    </div>
+<!--                                    <div class="checkbox">-->
+<!--                                        <label>-->
+<!--                                            <span class="h6 inlineBlock"> Rs (else Rp) </span>-->
+<!--                                            <div class="checkbox_container pull-right">-->
+<!--                                                <input type="checkbox" id="checkRsSelect">-->
+<!--                                                <div class="pseudoCheckbox"></div>-->
+<!--                                            </div>-->
+<!--                                        </label>-->
+<!--                                    </div>-->
                                     <div>
                                         <span class="h6 inlineBlock"> Fresnel Control </span>
                                         <div class="pull-right">
