@@ -189,7 +189,7 @@ sampleButtons = function () {
         }
 
 
-        if ($(this).text() === "Holmer") {
+        if ($(this).text() === "Yuchao Lin (1)") {
             initParameters();
 
             //Buddha
@@ -204,7 +204,7 @@ sampleButtons = function () {
 
         }
 
-        if ($(this).text() === "EscherEye") {
+        if ($(this).text() === "Yuchao Lin (2)") {
             initParameters();
 
             //Buddha
@@ -218,6 +218,22 @@ sampleButtons = function () {
 
 
         }
+
+        if ($(this).text() === "Yuchao Lin (3)") {
+            initParameters();
+
+            //Buddha
+            alphaR = 1.0;
+            image1.src = linkPrefix + "images/crossshade/dark.png";
+            image2.src = linkPrefix + "images/crossshade/dark.png";
+            image3.src = linkPrefix + "images/crossshade/shape.png"; //shape map
+            image4.src = linkPrefix + "images/dark.png";  //reflection
+            image5.src = linkPrefix + "images/dark.jpg";  //refraction
+            image6.src = linkPrefix + "images/white.png"; //alpha
+
+
+        }
+
 
         /*if($(this).text() ==="Jar")
         {

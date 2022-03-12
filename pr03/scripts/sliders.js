@@ -47,6 +47,11 @@ $(document).ready(function () {
         reflectNoise = slideEvt.value;
     });
 
+    $("#pointLGTspec_slider").slider({min: 0, max: 1.0, value: pointLightSpec, step: 0.001, focus: true});
+    $("#pointLGTspec_slider").on("slide", function (slideEvt) {
+        pointLightSpec = slideEvt.value;
+    });
+
     /**Alpha**/
 
     var alphaInRed_slider = $("#alphaInRed_slider");
@@ -236,12 +241,12 @@ function setupLightFunctions(i) {
     bindSliderValParamIndex(pointLGTdecay_slider, pointLGTdecay_val, "pointLightDecay", i);
 
 
-    var sliderName_pLightSpec = "#lightPanel" + i + " #pointLGTspec_slider";
-    var textarea_pLightSpec = "#lightPanel" + i + " #pointLGTspec_val";
-    var pointLGTspec_slider = $(sliderName_pLightSpec);
-    var pointLGTspec_val = $(textarea_pLightSpec);
-    pointLGTspec_slider.attr("data-slider-min", 0).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", pointLightSpec[i]).attr("data-slider-tooltip", "hide").slider({});
-    bindSliderValParamIndex(pointLGTspec_slider, pointLGTspec_val, "pointLightSpec", i);
+    // var sliderName_pLightSpec = "#lightPanel" + i + " #pointLGTspec_slider";
+    // var textarea_pLightSpec = "#lightPanel" + i + " #pointLGTspec_val";
+    // var pointLGTspec_slider = $(sliderName_pLightSpec);
+    // var pointLGTspec_val = $(textarea_pLightSpec);
+    // pointLGTspec_slider.attr("data-slider-min", 0).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", pointLightSpec).attr("data-slider-tooltip", "hide").slider({});
+    // bindSliderValParamIndex(pointLGTspec_slider, pointLGTspec_val, "pointLightSpec", i);
 
 
     ////init colorPicker & add events

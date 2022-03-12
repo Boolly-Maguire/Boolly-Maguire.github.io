@@ -262,7 +262,6 @@ function addLightParameters(index) {
     lightIntensity[index] = 0.5;
     pointLightDis[index] = 0.5;
     pointLightDecay[index] = 0.1;
-    pointLightSpec[index] = 1.0;
     showDiffuse[index] = 1;
     showSpec[index] = 1;
 

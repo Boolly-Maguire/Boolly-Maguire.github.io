@@ -21,8 +21,8 @@ pointLightDis[0] = 0.5;
 var pointLightDecay = [];
 pointLightDecay[0] = 0.1;
 
-var pointLightSpec = [];
-pointLightSpec[0] = 1.0;
+var pointLightSpec = 1.0;
+// pointLightSpec[0] = 1.0;
 
 var showDiffuse = [];
 showDiffuse[0] = 1;
@@ -65,7 +65,7 @@ function initParameters() {
     lightIntensity[0] = 1.0;
     pointLightDis[0] = 0.5;
     pointLightDecay[0] = 0.0;
-    pointLightSpec[0] = 1.0;
+    pointLightSpec = 1.0;
 
     showDiffuse[0] = 1;
     showSpec[0] = 1;
@@ -446,7 +446,7 @@ function render() {
     gl.uniform1iv(showSpecLoc, showSpec);
     gl.uniform1fv(pointLightDisLoc, pointLightDis);
     gl.uniform1fv(pointLightDecayLoc, pointLightDecay);
-    gl.uniform1fv(pointLightSpecLoc, pointLightSpec);
+    gl.uniform1f(pointLightSpecLoc, pointLightSpec);
 
     gl.uniform1f(styleBrightLoc, styleBright);
     gl.uniform1f(styleDarkLoc, styleDark);

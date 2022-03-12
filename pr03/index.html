@@ -88,7 +88,7 @@
         uniform vec3 lightColor[max_lights];
         uniform float lightIntensity[max_lights];
         uniform float pointLightDecay[max_lights];
-        uniform float pointLightSpec[max_lights];
+        uniform float pointLightSpec;
 
         uniform bool showDiffuse[max_lights];
         uniform bool showSpec[max_lights];
@@ -188,7 +188,7 @@
                         if (temp < 0.0)
                         temp = 0.0;
                         float spec = pow(temp, 200.0);
-                        finalSpec += specColor * spec * pointLightSpec[i];
+                        finalSpec += specColor * spec * pointLightSpec;
                     }
                 } else {
                     break;
@@ -199,11 +199,11 @@
         }
 
         //Reflected texture is treated as ultimate plane.
-        vec3 reflect1(vec3 n, float noise, float reflectIntensity) {
+        vec3 reflect1(vec3 n, float noise1, float noise2, float reflectIntensity) {
 
             vec3 reflect = - 1.0 * vec3(0.0, 0.0, 1.0) + 2.0 * dot(n, vec3(0.0, 0.0, 1.0)) * n;
 
-            vec2 reflCoord = f_texcoord + (reflect.xy / reflect.z) * FGdis + vec2(-mouseXYcopy.x * 0.5, mouseXYcopy.y * 0.5) + vec2(noise, noise);
+            vec2 reflCoord = f_texcoord + (reflect.xy / reflect.z) * FGdis + vec2(-mouseXYcopy.x * 0.5, mouseXYcopy.y * 0.5) + vec2(noise1, noise2);
             vec2 v = (reflCoord - vec2(0.5, 0.5)) / 0.5;
             reflCoord.x = v.x * (1.0 - FGscaleX) - FGshiftX + 0.5;
             reflCoord.y = v.y * (1.0 - FGscaleY) - FGshiftY + 0.5;
@@ -278,9 +278,9 @@
 
         // Reflected texture is treated as if it is on a hemisphere 1 unit
         // away from the surface.
-        vec3 reflect2(vec3 n, float noise, float reflectIntensity) {
+        vec3 reflect2(vec3 n, float noise1, float noise2, float reflectIntensity) {
 
-            vec2 reflCoord = f_texcoord + n.xy / n.z * FGdis + vec2(-mouseXYcopy.x * 0.5, mouseXYcopy.y * 0.5) + vec2(noise, noise);
+            vec2 reflCoord = f_texcoord + n.xy / n.z * FGdis + vec2(-mouseXYcopy.x * 0.5, mouseXYcopy.y * 0.5) + vec2(noise1, noise2);
             vec2 v = (reflCoord - vec2(0.5, 0.5)) / 0.5;
             reflCoord.x = v.x * (1.0 - FGscaleX) - FGshiftX + 0.5;
             reflCoord.y = v.y * (1.0 - FGscaleY) - FGshiftY + 0.5;
@@ -394,31 +394,31 @@
         vec3 fresnelBlend2(vec3 n, vec3 refl, vec3 refr) {
             float cos = dot(n, vec3(0, 0, 1.0));
             float ior = pow(2.0, logIOR);
+//            float ior = logIOR;
             ior = 1.0 / ior;
 
-            float rs = (ior * cos - sqrt(1.0 - ior * ior * (1.0 - cos * cos))) / (ior * cos + sqrt(1.0 - ior * ior * (1.0 - cos * cos)));
+            float square = 1.0 - ior * ior * (1.0 - cos * cos);
+            if (square < 0.0) {
+                square = 0.0;
+            }
+
+            float rs = (ior * cos - square) / (ior * cos + square);
             rs = rs * rs;
 
-            float rp = (ior * sqrt(1.0 - ior * ior * (1.0 - cos * cos)) - cos) / (ior * sqrt(1.0 - ior * ior * (1.0 - cos * cos)) + cos);
+            float rp = (ior * square - cos) / (ior * square + cos);
             rp = rp * rp;
 
 
             float fresnel = (rs + rp) / 2.0;
 
-//            if (checkRs) {
-//                fresnel = rs;
-//            } else {
-//                fresnel = rp;
-//            }
 
-
-//            if (fresnelIntensity > 0.0) {
-//                fresnel = 1.0 * fresnelIntensity + fresnel * (1.0 - fresnelIntensity);
-//                return refl * fresnel + refr * (1.0 - fresnel);
-//            } else {
-//                fresnel = fresnel * (1.0 + fresnelIntensity)
-            return refl * fresnel + refr * (1.0 - fresnel);
-//            }
+            if (fresnelIntensity > 0.0) {
+                fresnel = 1.0 * fresnelIntensity + fresnel * (1.0 - fresnelIntensity);
+                return refl * fresnel + refr * (1.0 - fresnel);
+            } else {
+                fresnel = fresnel * (1.0 + fresnelIntensity);
+                return refl * fresnel + refr * (1.0 - fresnel);
+            }
 
 
             //vec3 reflTemp = refl * reflectIntensity ;
@@ -441,20 +441,24 @@
             vec3 refl = vec3 (0, 0, 0);
 
             if (reflMap == 1) {
-                for (int i = 0; i < 100; i++) {
-                    refl += reflect1(n, float(i) * reflectNoise * 2.0 / 100.0 - reflectNoise, 0.01);
+                for (int i = 0; i < 10; i++) {
+                    for (int j = 0; j < 10; j ++) {
+                        refl += reflect1(n, float(i) * reflectNoise * 2.0 / 10.0 - reflectNoise, float(j) * reflectNoise * 2.0 / 10.0 - reflectNoise, 0.01);
+                    }
                 }
                 refl += specular;
                 if (checkFresnel) {
-                    refl = reflect1(n, 0.0, 1.0);
+                    refl = reflect1(n, 0.0, 0.0, 1.0);
                 }
             } else if (reflMap == 2) {
-                for (int i = 0; i < 100; i++) {
-                    refl += reflect2(n, float(i) * reflectNoise * 2.0 / 100.0 - reflectNoise, 0.01);
+                for (int i = 0; i < 10; i++) {
+                    for (int j = 0; j < 10; j++) {
+                        refl += reflect1(n, float(i) * reflectNoise * 2.0 / 10.0 - reflectNoise, float(j) * reflectNoise * 2.0 / 10.0 - reflectNoise, 0.01);
+                    }
                 }
                 refl += specular;//hemisphere
                 if (checkFresnel) {
-                    refl = reflect2(n, 0.0, 1.0);
+                    refl = reflect2(n, 0.0, 0.0, 1.0);
                 }
             }
 
@@ -520,10 +524,10 @@
             /*
                         vec2 v0 = f_texcoord - mouseXY0;
                         vec3 NewNormal;
-                         NewNormal = vec3(v0.xy, sqrt(1.0 - length(v0)/(0.1*0.1)));
+                        NewNormal = vec3(v0.xy, sqrt(1.0 - length(v0)/(0.1*0.1)));
 
                         vec3 Newrefr = refract(NewNormal);
-                        gl_FragColor = vec4(refr,1.0);
+                        gl_FragColor = vec4(refr, 1.0);
             */
 
             /*
@@ -589,10 +593,11 @@
 
                     <button class="main_button btn btn-block btn-mycustom dropdown-item">Modigliani Soft</button>
 
-                    <button class="main_button btn btn-block btn-mycustom dropdown-item">Holmer</button>
+                    <button class="main_button btn btn-block btn-mycustom dropdown-item">Yuchao Lin (1)</button>
 
-                    <button class="main_button btn btn-block btn-mycustom dropdown-item">EscherEye</button>
+                    <button class="main_button btn btn-block btn-mycustom dropdown-item">Yuchao Lin (2)</button>
 
+                    <button class="main_button btn btn-block btn-mycustom dropdown-item">Yuchao Lin (3)</button>
 
                     <div class="clearfix"></div>
                 </div>
@@ -667,7 +672,17 @@
                                        value=""/>
                             </div>
                             <div>
-                                <div class="h7 inlineBlock">Noise</div>
+                                <div class="h7 inlineBlock">Blurring</div>
+                                <div class="h7 pull-right"></div>
+
+                            </div>
+
+                            <div class="slider_box">
+                                <input id="pointLGTspec_slider" data-slider-id='customSlider' type="text" class="span2"
+                                       value=""/>
+                            </div>
+                            <div>
+                                <div class="h7 inlineBlock">Translucency</div>
                                 <div class="h7 pull-right"></div>
 
                             </div>
@@ -1153,15 +1168,15 @@
                     <input id="pointLGTdecay_slider" data-slider-id='customSlider' type="text"/>
                 </div>
             </div>
-            <div class="slider_container">
-                <span class="h6 inlineBlock"> Specular Control</span>
-                <div class="pull-right">
-                    <input type="text" class="form-control mytextbox text-center" id="pointLGTspec_val">
-                </div>
-                <div class="slider_box">
-                    <input id="pointLGTspec_slider" data-slider-id='customSlider' type="text"/>
-                </div>
-            </div>
+<!--            <div class="slider_container">-->
+<!--                <span class="h6 inlineBlock"> Specular Control</span>-->
+<!--                <div class="pull-right">-->
+<!--                    <input type="text" class="form-control mytextbox text-center" id="pointLGTspec_val">-->
+<!--                </div>-->
+<!--                <div class="slider_box">-->
+<!--                    <input id="pointLGTspec_slider" data-slider-id='customSlider' type="text"/>-->
+<!--                </div>-->
+<!--            </div>-->
 
         </div>
     </li>
