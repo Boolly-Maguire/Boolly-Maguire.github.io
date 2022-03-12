@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>Ray Casting</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<div class="header">
+    Ray Casting
+</div>
+<div id="sidebar" class="sidebar">
+    <br><br>
+    <p>The Sphere is placed at (0,0,0), with Radius = <span id="r_value"></span> </p>
+    <p>Radius of Sphere      0.05 <input type="range" min="0.05" max="0.50" value="0.2"  class="myslider" step="0.0001" id="r"> 0.50</p>
+
+    ---------------------------------------------------------------------------------------
+    <p>Coordinates of Camera</p>
+    <img src="xyz.jpg" width="150" >
+    <br><br>
+    <p>z-coordinate          0.2 <input type="range" min="0.2" max="1" value="1"  class="myslider" step="0.0001" id="z"> 1.0 </p>
+
+    <p>y-coordinate        -0.05 <input type="range" min="-0.05" max="0.05" value="0"  class="myslider" step="0.0001" id="y"> 0.05 </p>
+
+    <p>x-coordinate        -0.05 <input type="range" min="-0.05" max="0.05" value="0"  class="myslider" step="0.0001" id="x"> 0.05 </p>
+    <p> (X,Y,Z) =  ( <span id="x_value"></span>, <span id="y_value"></span>, <span id="z_value"></span> ) </p>
+    <br>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<!-- vertex shader -->
+<script  id="vertex-shader-3d" type="x-shader/x-vertex">
+attribute vec4 a_position;
+varying vec4 v_position;
+
+void main() {
+  v_position  = a_position;
+  gl_Position = a_position;
+}
+</script>
+
+<!-- fragment shader -->
+<script  id="fragment-shader-3d" type="x-shader/x-fragment">
+precision mediump float;
+
+uniform vec4 u_color;
+uniform vec3 pe;
+uniform float r;
+varying vec4 v_position;
+
+void main() {
+   vec3 pi = vec3(0.0,0.0,0.0);        //center of sphere
+   vec3 ph = vec3(v_position[0],v_position[1],v_position[2]);
+
+   //construct ray from the eye for each pixel
+   float b,c,delta;
+   vec3 n_pe = normalize(pe-ph);
+   b = dot(n_pe,pi-pe);
+   c = dot(pe-pi,pe-pi) - r*r;
+
+   if (b*b-c>=0.0)
+            gl_FragColor = vec4(1,1,1,0);
+   else
+            gl_FragColor = u_color;
+
+}
+</script><!--
+for most samples webgl-utils only provides shader compiling/linking and
+canvas resizing because why clutter the examples with code that's the same in every sample.
+See https://webglfundamentals.org/webgl/lessons/webgl-boilerplate.html
+and https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
+for webgl-utils, m3, m4, and webgl-lessons-ui.
+-->
+<script src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
+<script src="https://webglfundamentals.org/webgl/resources/webgl-lessons-ui.js"></script>
+<script src="script.js"></script>
+
+
+<script>
+    var sliderZ = document.getElementById("z");
+    var outputZ = document.getElementById("z_value");
+    outputZ.innerHTML = sliderZ.value;
+
+    sliderZ.oninput = function() {
+        outputZ.innerHTML = this.value;
+    }
+</script>
+
+
+<script>
+    var sliderX = document.getElementById("x");
+    var outputX = document.getElementById("x_value");
+    outputX.innerHTML = sliderX.value;
+
+    sliderX.oninput = function() {
+        outputX.innerHTML = this.value;
+    }
+</script>
+
+<script>
+    var sliderY = document.getElementById("y");
+    var outputY = document.getElementById("y_value");
+    outputY.innerHTML = sliderY.value;
+
+    sliderY.oninput = function() {
+        outputY.innerHTML = this.value;
+    }
+</script>
+
+<script>
+    var sliderR = document.getElementById("r");
+    var outputR = document.getElementById("r_value");
+    outputR.innerHTML = sliderR.value;
+
+    sliderR.oninput = function() {
+        outputR.innerHTML = this.value;
+    }
+</script>
+<body>
+</body>
+</html>
