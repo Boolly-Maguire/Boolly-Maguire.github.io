@@ -9,7 +9,7 @@ function main() {
     var canvas = document.querySelector("#canvas");
     var gl = canvas.getContext("webgl");
     if (!gl) {
-    return;
+        return;
     }
 
     // setup GLSL program
@@ -20,8 +20,8 @@ function main() {
 
     // lookup uniforms
     var colorLocation = gl.getUniformLocation(program, "u_color");
-    var pe = gl.getUniformLocation(program,"pe");
-    var r = gl.getUniformLocation(program,"r");
+    var pe = gl.getUniformLocation(program, "pe");
+    var r = gl.getUniformLocation(program, "r");
 
 
     // Create a buffer to put positions in
@@ -58,10 +58,10 @@ function main() {
         positionLocation, size, type, normalize, stride, offset);
 
     // set the uniforms
-    var color = [0,0,0,1];
+    var color = [0, 0, 0, 1];
     gl.uniform4fv(colorLocation, color);
-    gl.uniform3fv(pe,[0.0,0.0,1]);   //default camera position
-    gl.uniform1f(r,0.2);             //default radius of sphere
+    gl.uniform3fv(pe, [0.0, 0.0, 1]);   //default camera position
+    gl.uniform1f(r, 0.2);             //default radius of sphere
 
 
     // Draw the geometry.
@@ -81,26 +81,26 @@ function main() {
     r_slider.addEventListener("input", update);
 
     function update() {
-        gl.uniform3fv(pe,[x_slider.value,y_slider.value,z_slider.value]);
-        gl.uniform1f(r,r_slider.value);
+        gl.uniform3fv(pe, [x_slider.value, y_slider.value, z_slider.value]);
+        gl.uniform1f(r, r_slider.value);
         gl.drawArrays(primitiveType, offset, count);
     }
 
 }
 
-// Fill the buffer with the values that define a letter 'F'.
+// Fill the canvas with black.
 function setGeometry(gl) {
     gl.bufferData(
-    gl.ARRAY_BUFFER,
-    new Float32Array([
-        // left column front
-        1,-1,0,
-        -1,1,0,
-         1,1,0,
-        -1,-1,0,
-        -1,1,0,
-        1,-1,0]),
-    gl.STATIC_DRAW);
+        gl.ARRAY_BUFFER,
+        new Float32Array([
+            // left column front
+            1, -1, 0,
+            -1, 1, 0,
+            1, 1, 0,
+            -1, -1, 0,
+            -1, 1, 0,
+            1, -1, 0]),
+        gl.STATIC_DRAW);
 }
 
 main();

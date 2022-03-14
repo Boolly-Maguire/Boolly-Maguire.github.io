@@ -10,60 +10,113 @@
 </div>
 <div id="sidebar" class="sidebar">
     <br><br>
-    <p>The Sphere is placed at (0,0,0), with Radius = <span id="r_value"></span> </p>
-    <p>Radius of Sphere      0.05 <input type="range" min="0.05" max="0.50" value="0.2"  class="myslider" step="0.0001" id="r"> 0.50</p>
+    <p>The Sphere is placed at (0,0,0), with Radius = <span id="r_value"></span></p>
+    <p>Radius of Sphere 0.05 <input type="range" min="0.05" max="0.50" value="0.2" class="myslider" step="0.0001"
+                                    id="r"> 0.50</p>
 
     ---------------------------------------------------------------------------------------
     <p>Coordinates of Camera</p>
-    <img src="xyz.jpg" width="150" >
+    <img src="xyz.jpg" width="150">
     <br><br>
-    <p>z-coordinate          0.2 <input type="range" min="0.2" max="1" value="1"  class="myslider" step="0.0001" id="z"> 1.0 </p>
+    <p>z-coordinate 0.2 <input type="range" min="0.2" max="1" value="1" class="myslider" step="0.0001" id="z"> 1.0
+    </p>
 
-    <p>y-coordinate        -0.05 <input type="range" min="-0.05" max="0.05" value="0"  class="myslider" step="0.0001" id="y"> 0.05 </p>
+    <p>y-coordinate -0.05 <input type="range" min="-0.05" max="0.05" value="0" class="myslider" step="0.0001"
+                                 id="y"> 0.05 </p>
 
-    <p>x-coordinate        -0.05 <input type="range" min="-0.05" max="0.05" value="0"  class="myslider" step="0.0001" id="x"> 0.05 </p>
-    <p> (X,Y,Z) =  ( <span id="x_value"></span>, <span id="y_value"></span>, <span id="z_value"></span> ) </p>
+    <p>x-coordinate -0.05 <input type="range" min="-0.05" max="0.05" value="0" class="myslider" step="0.0001"
+                                 id="x"> 0.05 </p>
+    <p> (X,Y,Z) = ( <span id="x_value"></span>, <span id="y_value"></span>, <span id="z_value"></span> ) </p>
     <br>
 </div>
 
 <canvas id="canvas"></canvas>
-
 <!-- vertex shader -->
-<script  id="vertex-shader-3d" type="x-shader/x-vertex">
-attribute vec4 a_position;
-varying vec4 v_position;
+<script id="vertex-shader-3d" type="x-shader/x-vertex">
+    attribute vec4 a_position;
+    varying vec4 v_position;
 
-void main() {
-  v_position  = a_position;
-  gl_Position = a_position;
-}
+    void main() {
+        v_position  = a_position;
+        gl_Position = a_position;
+    }
 </script>
 
 <!-- fragment shader -->
-<script  id="fragment-shader-3d" type="x-shader/x-fragment">
-precision mediump float;
+<script id="fragment-shader-3d" type="x-shader/x-fragment">
+    precision mediump float;
 
-uniform vec4 u_color;
-uniform vec3 pe;
-uniform float r;
-varying vec4 v_position;
+    uniform vec4 u_color;
+    uniform vec3 pe;
+    uniform float r;
+    varying vec4 v_position;
 
-void main() {
-   vec3 pi = vec3(0.0,0.0,0.0);        //center of sphere
-   vec3 ph = vec3(v_position[0],v_position[1],v_position[2]);
+    vec4 diffuse(vec3 n, vec3 ph) {
+        vec4 color = vec4(0., 0., 0., 1.);
 
-   //construct ray from the eye for each pixel
-   float b,c,delta;
-   vec3 n_pe = normalize(pe-ph);
-   b = dot(n_pe,pi-pe);
-   c = dot(pe-pi,pe-pi) - r*r;
+        vec3 p_light = vec3(1., 1., 1.); // light position
+        vec3 light_color = vec3(1., 1., 1.);
+        vec3 v_light = normalize(p_light - ph);
 
-   if (b*b-c>=0.0)
-            gl_FragColor = vec4(1,1,1,0);
-   else
-            gl_FragColor = u_color;
+        float cos = (dot(n, v_light) + 1.0) / 2.0;
+        color += cos * vec4(light_color, 1.0);
+        return color;
+    }
 
-}
+    vec3 spec(vec3 n, vec3 npe, vec3 ph) {
+        vec3 spec = vec3(0.0, 0.0, 0.0);
+
+        vec3 p_light = vec3(1., 1., 1.); // light position
+        vec3 light_color = vec3(1., 1., 1.);
+        vec3 v_light = normalize(p_light - ph);
+
+        vec3 RVector = -v_light + 2.0 * dot(n, v_light) * n;
+        float temp = dot(RVector, -npe);
+        if (temp < 0.0)
+            temp = 0.0;
+        float specular = pow(temp, 20.);
+        spec += light_color * specular;
+        return spec;
+    }
+
+    vec4 general_quadrics(
+        float a02, float a12, float a22, float a21, float a00,
+        float s0, float s1, float s2,
+        vec3 v2, vec3 vup, vec3 pc,
+        vec3 pe, vec3 npe,
+        vec3 ph) {
+
+        // find roots
+        vec3 n0 = normalize(cross(vup, v2));
+        vec3 n1 = normalize(cross(n0, v2));
+        vec3 n2 = normalize(v2);
+
+        float A = a02 * dot(n0, npe) * dot(n0, npe) / (s0 * s0) + a12 * dot(n1, npe) * dot(n1, npe) / (s1 * s1) + a22 * dot(n2, npe) * dot(n2, npe) / (s2 * s2);
+        float B = 2.0 * a02 * dot(n0, npe) * dot(n0, pe - pc) / (s0 * s0) + 2.0 * a12 * dot(n1, npe) * dot(n1, pe - pc) / (s1 * s1) + 2.0 * a22 * dot(n2, npe) * dot(n2, pe - pc) / (s2 * s2) + a21 * dot(n2, npe) / s2;
+        float C = a02 * dot(n0, pe - pc) * dot(n0, pe - pc) / (s0 * s0) + a12 * dot(n1, pe - pc) * dot(n1, pe - pc) / (s1 * s1) + a22 * dot(n2, pe - pc) * dot(n2, pe - pc) / (s2 * s2) + a21 * dot(n2, pe - pc) / s2 + a00;
+        float delta = B * B - 4.0 * A * C;
+
+        if (delta >= 0.0 && -B - sqrt(delta) >= 0.0) {
+            float th = (-B - sqrt(delta)) / (2.0 * A);
+            vec3 ph = pe + th * npe;
+            vec3 fp = 2.0 * a02 * n0 * dot(n0, ph - pc) / (s0 * s0) + 2.0 * a12 * n1 * dot(n1, ph - pc) / (s1 * s1) + 2.0 * a22 * n2 * dot(n2, ph - pc) / (s2 * s2) + a21 * n2 / s2;
+            fp = normalize(fp);
+            return diffuse(fp, ph) + vec4(spec(fp, npe, ph), 1.);;
+        } else {
+            return u_color;
+        }
+    }
+
+    void main() {
+        vec3 pi = vec3(0.0, 0.0, 0.0);
+        vec3 ph = vec3(v_position[0], v_position[1], v_position[2]);
+        vec3 npe = normalize(ph - pe);
+        vec3 v2 = vec3(0., 0., 1.);
+        vec3 vup = vec3(1., 0., 0.);
+
+        vec4 color = general_quadrics(1., 1., 1., 0., -1., r, r, r, v2, vup, pi, pe, npe, ph);
+        gl_FragColor = color;
+    }
 </script><!--
 for most samples webgl-utils only provides shader compiling/linking and
 canvas resizing because why clutter the examples with code that's the same in every sample.
@@ -81,7 +134,7 @@ for webgl-utils, m3, m4, and webgl-lessons-ui.
     var outputZ = document.getElementById("z_value");
     outputZ.innerHTML = sliderZ.value;
 
-    sliderZ.oninput = function() {
+    sliderZ.oninput = function () {
         outputZ.innerHTML = this.value;
     }
 </script>
@@ -92,7 +145,7 @@ for webgl-utils, m3, m4, and webgl-lessons-ui.
     var outputX = document.getElementById("x_value");
     outputX.innerHTML = sliderX.value;
 
-    sliderX.oninput = function() {
+    sliderX.oninput = function () {
         outputX.innerHTML = this.value;
     }
 </script>
@@ -102,7 +155,7 @@ for webgl-utils, m3, m4, and webgl-lessons-ui.
     var outputY = document.getElementById("y_value");
     outputY.innerHTML = sliderY.value;
 
-    sliderY.oninput = function() {
+    sliderY.oninput = function () {
         outputY.innerHTML = this.value;
     }
 </script>
@@ -112,7 +165,7 @@ for webgl-utils, m3, m4, and webgl-lessons-ui.
     var outputR = document.getElementById("r_value");
     outputR.innerHTML = sliderR.value;
 
-    sliderR.oninput = function() {
+    sliderR.oninput = function () {
         outputR.innerHTML = this.value;
     }
 </script>
