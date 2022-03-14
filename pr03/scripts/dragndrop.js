@@ -234,6 +234,51 @@ sampleButtons = function () {
 
         }
 
+        if ($(this).text() === "Hongyi Ling (1)") {
+            initParameters();
+
+            //Buddha
+            alphaR = 1;
+            image1.src = linkPrefix + "images/girl/di0.png";//dark
+            image2.src = linkPrefix + "images/girl/di1.png";//bright
+            image3.src = linkPrefix + "images/girl/sm.png"; //shape map
+            image4.src = linkPrefix + "images/dark.png";  //reflection
+            image5.src = linkPrefix + "images/dark.png";  //refraction
+            image6.src = linkPrefix + "images/white.png"; //alpha
+
+
+        }
+
+        if ($(this).text() === "Hongyi Ling (2)") {
+            initParameters();
+
+            //Buddha
+            alphaR = 0.2;
+            image1.src = linkPrefix + "images/monalisa/DI0.png";//dark
+            image2.src = linkPrefix + "images/monalisa/DI1.png";//bright
+            image3.src = linkPrefix + "images/monalisa/SM.png"; //shape map
+            image4.src = linkPrefix + "images/bottle/bg.png";  //reflection
+            image5.src = linkPrefix + "images/dark.png";  //refraction
+            image6.src = linkPrefix + "images/white.png"; //alpha
+
+
+        }
+
+        if ($(this).text() === "Hongyi Ling (3)") {
+            initParameters();
+
+            //Buddha
+            alphaR = 1.0;
+            image1.src = linkPrefix + "images/Eye/eye_dark.png";
+            image2.src = linkPrefix + "images/Eye/eye_bright.png";
+            image3.src = linkPrefix + "images/Eye/eye_shape_smooth.png"; //shape map
+            image4.src = linkPrefix + "images/himlaya.png";  //reflection
+            image5.src = linkPrefix + "images/dark.jpg";  //refraction
+            image6.src = linkPrefix + "images/Eye/eye_alpha.jpg"; //alpha
+
+
+        }
+
 
         /*if($(this).text() ==="Jar")
         {
