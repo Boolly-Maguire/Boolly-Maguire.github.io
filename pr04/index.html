@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Ray Casting</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/spectrum/1.8.0/spectrum.min.css">
 </head>
 <div class="header">
     Ray Casting
@@ -14,6 +15,13 @@
     <p>Radius of Sphere 0.05 <input type="range" min="0.05" max="0.50" value="0.2" class="myslider" step="0.0001"
                                     id="r"> 0.50</p>
 
+    <p>Bright Diffuse Style <input type="range" min="0.0" max="1.0" value="0.8" class="myslider" step="0.0001"
+                                   id="bright"></p>
+    <p>Dark Diffuse Style <input type="range" min="0.0" max="1.0" value="0.2" class="myslider" step="0.0001"
+                                 id="dark"></p>
+    <p>Specular Sharpness <input type="range" min="0.01" max="1.0" value="0.2" class="myslider" step="0.0001"
+                                 id="sharp"></p>
+    <p>Light Color <input type="color" id="color" value="#ffffff"></p>
     ---------------------------------------------------------------------------------------
     <p>Coordinates of Camera</p>
     <img src="xyz.jpg" width="150">
@@ -48,34 +56,44 @@
 
     uniform vec4 u_color;
     uniform vec3 pe;
+    uniform vec3 color;
     uniform float r;
+    uniform float bright;
+    uniform float dark;
+    uniform float sharp;
+
     varying vec4 v_position;
 
-    vec4 diffuse(vec3 n, vec3 ph) {
-        vec4 color = vec4(0., 0., 0., 1.);
+    vec3 p_light = vec3(1., 1., 1.); // light position
 
-        vec3 p_light = vec3(1., 1., 1.); // light position
-        vec3 light_color = vec3(1., 1., 1.);
+
+    vec4 diffuse(vec3 n, vec3 ph) {
+        vec4 result = vec4(0., 0., 0., 1.);
+
         vec3 v_light = normalize(p_light - ph);
 
         float cos = (dot(n, v_light) + 1.0) / 2.0;
-        color += cos * vec4(light_color, 1.0);
-        return color;
+        float t = (cos - dark) / (bright - dark);
+        if (t > 1.0)
+            t = 1.0;
+        if (t < 0.0)
+            t = 0.0;
+
+        result += t * vec4(color, 1.0);
+        return result;
     }
 
     vec3 spec(vec3 n, vec3 npe, vec3 ph) {
         vec3 spec = vec3(0.0, 0.0, 0.0);
 
-        vec3 p_light = vec3(1., 1., 1.); // light position
-        vec3 light_color = vec3(1., 1., 1.);
         vec3 v_light = normalize(p_light - ph);
 
         vec3 RVector = -v_light + 2.0 * dot(n, v_light) * n;
         float temp = dot(RVector, -npe);
         if (temp < 0.0)
             temp = 0.0;
-        float specular = pow(temp, 20.);
-        spec += light_color * specular;
+        float specular = pow(temp, sharp * 100.);
+        spec += color * specular;
         return spec;
     }
 
@@ -129,6 +147,7 @@ for webgl-utils, m3, m4, and webgl-lessons-ui.
 <script src="script.js"></script>
 
 
+
 <script>
     var sliderZ = document.getElementById("z");
     var outputZ = document.getElementById("z_value");
@@ -169,6 +188,7 @@ for webgl-utils, m3, m4, and webgl-lessons-ui.
         outputR.innerHTML = this.value;
     }
 </script>
+
 <body>
 </body>
 </html>
