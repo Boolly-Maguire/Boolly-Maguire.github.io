@@ -291,6 +291,19 @@ sampleButtons = function () {
             image6.src = linkPrefix + "images/white.png"; //alpha
 
         }
+        
+        if ($(this).text() === "Varda - Multi Pane Window") {
+            initParameters();
+
+            alphaR=0.0;
+            image1.src = linkPrefix + "images/varda/Window_D.jpg";
+            image2.src = linkPrefix + "images/varda/Window_L.jpg";
+            image3.src = linkPrefix + "images/varda/Window_N.jpg"; //shape map
+            image4.src = linkPrefix + "images/varda/sunflower.jpg";  //reflection
+            image5.src = linkPrefix + "images/varda/Window_D.jpg";  //refraction
+            image6.src = linkPrefix + "images/varda/Window_A.jpg"; //alpha
+
+        }
 
         if ($(this).text() === "Varda - Sphere") {
             initParameters();
