@@ -69,3 +69,11 @@ canvas {
     background: black;
     cursor: pointer;
 }
+
+#bright {
+    direction: rtl
+}
+
+#dark {
+    direction: rtl
+}

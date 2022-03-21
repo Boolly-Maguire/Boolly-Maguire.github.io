@@ -1,8 +1,12 @@
 "use strict";
 
+var points = [];
+
 function main() {
     // Get A WebGL context
     /** @type {HTMLCanvasElement} */
+    cube();
+
     var canvas = document.querySelector("#canvas");
     var gl = canvas.getContext("webgl");
     if (!gl) {
@@ -11,26 +15,6 @@ function main() {
 
     // setup GLSL program
     var program = webglUtils.createProgramFromScripts(gl, ["vertex-shader-3d", "fragment-shader-3d"]);
-
-    // look up where the vertex data needs to go.
-    var positionLocation = gl.getAttribLocation(program, "a_position");
-
-    // lookup uniforms
-    var colorLocation = gl.getUniformLocation(program, "u_color");
-    var pe = gl.getUniformLocation(program, "pe");
-    var r = gl.getUniformLocation(program, "r");
-    var bright = gl.getUniformLocation(program, "bright");
-    var dark = gl.getUniformLocation(program, "dark");
-    var sharp = gl.getUniformLocation(program, "sharp");
-    var lightColor = gl.getUniformLocation(program, "color");
-
-
-    // Create a buffer to put positions in
-    var positionBuffer = gl.createBuffer();
-    // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    // Put geometry data into buffer
-    setGeometry(gl);
 
     webglUtils.resizeCanvasToDisplaySize(gl.canvas);
 
@@ -43,38 +27,37 @@ function main() {
     // Tell it to use our program (pair of shaders)
     gl.useProgram(program);
 
+    // set point data
+    var vBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(points), gl.STATIC_DRAW);
     // Turn on the attribute
+    var positionLocation = gl.getAttribLocation(program, "a_position");
+    gl.vertexAttribPointer(positionLocation, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(positionLocation);
 
-    // Bind the position buffer.
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
-    // Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
-    var size = 3;          // 3 components per iteration
-    var type = gl.FLOAT;   // the data is 32bit floats
-    var normalize = false; // don't normalize the data
-    var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
-    var offset = 0;        // start at the beginning of the buffer
-    gl.vertexAttribPointer(
-        positionLocation, size, type, normalize, stride, offset);
+    // set properties
+    var coordinate = gl.getUniformLocation(program, "coordinate");
+    var r = gl.getUniformLocation(program, "r");
+    var bright = gl.getUniformLocation(program, "bright");
+    var dark = gl.getUniformLocation(program, "dark");
+    var sharp = gl.getUniformLocation(program, "sharp");
+    var lightColor = gl.getUniformLocation(program, "color");
 
     // set the uniforms
-    var color = [0, 0, 0, 1];
-    gl.uniform4fv(colorLocation, color);
-    gl.uniform3fv(pe, [0.0, 0.0, 1.0]);   //default camera position
-    gl.uniform1f(r, 0.2);             //default radius of sphere
+    gl.uniform3fv(coordinate, [0.0, 0.0, 1.0]);   //default camera position
+    gl.uniform1f(r, 0.05);             //default radius of sphere
     gl.uniform1f(bright, 0.8);             //default radius of sphere
     gl.uniform1f(dark, 0.2);             //default radius of sphere
     gl.uniform1f(sharp, 0.2);             //default radius of sphere
-    gl.uniform3fv(lightColor, [1.0, 1.0, 1.0]);   //default camera position
+    gl.uniform3fv(lightColor, [1.0, 1.0, 1.0]);   //default light position
 
 
     // Draw the geometry.
-    var primitiveType = gl.TRIANGLES;
-    var offset = 0;
-    var count = 6;
-    gl.drawArrays(primitiveType, offset, count);
+    gl.drawArrays(gl.TRIANGLES, 0, 36);
 
+    // HTML listening
     var x_slider = document.querySelector('#x');
     var y_slider = document.querySelector('#y');
     var z_slider = document.querySelector('#z');
@@ -94,7 +77,7 @@ function main() {
     color_picker.addEventListener("input", update);
 
     function update() {
-        gl.uniform3fv(pe, [x_slider.value, y_slider.value, z_slider.value]);
+        gl.uniform3fv(coordinate, [x_slider.value, y_slider.value, z_slider.value]);
         gl.uniform1f(r, r_slider.value);
         gl.uniform1f(bright, bright_slider.value);
         gl.uniform1f(dark, dark_slider.value);
@@ -103,7 +86,7 @@ function main() {
         var rgb = hexToRgb(color_picker.value)
         gl.uniform3fv(lightColor, [rgb.r / 255.0, rgb.g / 255.0, rgb.b / 255.0]);
 
-        gl.drawArrays(primitiveType, offset, count);
+        gl.drawArrays(gl.TRIANGLES, 0, 36);
     }
 
 }
@@ -118,19 +101,32 @@ function hexToRgb(hex) {
 }
 
 
-// Fill the canvas with black.
-function setGeometry(gl) {
-    gl.bufferData(
-        gl.ARRAY_BUFFER,
-        new Float32Array([
-            // left column front
-            1, -1, 0,
-            -1, 1, 0,
-            1, 1, 0,
-            -1, -1, 0,
-            -1, 1, 0,
-            1, -1, 0]),
-        gl.STATIC_DRAW);
+function quad(a, b, c, d) {
+
+    var vertices = [
+        [-1.0, -1.0, 1.0, 1.0],
+        [-1.0, 1.0, 1.0, 1.0],
+        [1.0, 1.0, 1.0, 1.0],
+        [1.0, -1.0, 1.0, 1.0],
+        [-1.0, -1.0, -1.0, 1.0],
+        [-1.0, 1.0, -1.0, 1.0],
+        [1.0, 1.0, -1.0, 1.0],
+        [1.0, -1.0, -1.0, 1.0]
+    ];
+
+    var indices = [a, b, c, a, c, d];
+    for (var i = 0; i < indices.length; ++i) {
+        points.push(...vertices[indices[i]]);
+    }
+}
+
+function cube() {
+    quad(1, 0, 3, 2);
+    quad(2, 3, 7, 6);
+    quad(3, 0, 4, 7);
+    quad(6, 5, 1, 2);
+    quad(4, 5, 6, 7);
+    quad(5, 4, 0, 1);
 }
 
 main();

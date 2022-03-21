@@ -12,29 +12,29 @@
 <div id="sidebar" class="sidebar">
     <br><br>
     <p>The Sphere is placed at (0,0,0), with Radius = <span id="r_value"></span></p>
-    <p>Radius of Sphere 0.05 <input type="range" min="0.05" max="0.50" value="0.2" class="myslider" step="0.0001"
-                                    id="r"> 0.50</p>
+    <p>Radius of Sphere 0.05 <input type="range" min="0.005" max="0.05" value="0.05" class="myslider" step="0.0001"
+                                    id="r"> 0.05</p>
 
-    <p>Bright Diffuse Style <input type="range" min="0.0" max="1.0" value="0.8" class="myslider" step="0.0001"
+    <p>Bright/Dark Diffuse Style <input type="range" min="0.0" max="1.0" value="0.8" class="myslider" step="0.0001"
                                    id="bright"></p>
-    <p>Dark Diffuse Style <input type="range" min="0.0" max="1.0" value="0.2" class="myslider" step="0.0001"
+    <p>Bright/Dark Diffuse Style <input type="range" min="0.0" max="1.0" value="0.2" class="myslider" step="0.0001"
                                  id="dark"></p>
     <p>Specular Sharpness <input type="range" min="0.01" max="1.0" value="0.2" class="myslider" step="0.0001"
                                  id="sharp"></p>
     <p>Light Color <input type="color" id="color" value="#ffffff"></p>
     ---------------------------------------------------------------------------------------
-    <p>Coordinates of Camera</p>
+    <p>Cartesian Coordinate</p>
     <img src="xyz.jpg" width="150">
     <br><br>
-    <p>z-coordinate 0.2 <input type="range" min="0.2" max="1" value="1" class="myslider" step="0.0001" id="z"> 1.0
+    <p>z<input type="range" min="-1.0" max="1.0" value="1" class="myslider" step="0.0001" id="z">
     </p>
 
-    <p>y-coordinate -0.05 <input type="range" min="-0.05" max="0.05" value="0" class="myslider" step="0.0001"
-                                 id="y"> 0.05 </p>
+    <p>y<input type="range" min="-1.0" max="1.0" value="0" class="myslider" step="0.0001"
+                                 id="y"></p>
 
-    <p>x-coordinate -0.05 <input type="range" min="-0.05" max="0.05" value="0" class="myslider" step="0.0001"
-                                 id="x"> 0.05 </p>
-    <p> (X,Y,Z) = ( <span id="x_value"></span>, <span id="y_value"></span>, <span id="z_value"></span> ) </p>
+    <p>x<input type="range" min="-1.0" max="1.0" value="0" class="myslider" step="0.0001"
+                                 id="x"></p>
+    <p> (x, y, z) = ( <span id="x_value"></span>, <span id="y_value"></span>, <span id="z_value"></span> ) </p>
     <br>
 </div>
 
@@ -42,10 +42,11 @@
 <!-- vertex shader -->
 <script id="vertex-shader-3d" type="x-shader/x-vertex">
     attribute vec4 a_position;
+    attribute vec2 texcoord;
     varying vec4 v_position;
 
     void main() {
-        v_position  = a_position;
+        v_position = a_position;
         gl_Position = a_position;
     }
 </script>
@@ -53,19 +54,16 @@
 <!-- fragment shader -->
 <script id="fragment-shader-3d" type="x-shader/x-fragment">
     precision mediump float;
+    varying vec4 v_position;
 
-    uniform vec4 u_color;
-    uniform vec3 pe;
     uniform vec3 color;
     uniform float r;
     uniform float bright;
     uniform float dark;
     uniform float sharp;
 
-    varying vec4 v_position;
-
+    uniform vec3 coordinate; // xyz coordinate
     vec3 p_light = vec3(1., 1., 1.); // light position
-
 
     vec4 diffuse(vec3 n, vec3 ph) {
         vec4 result = vec4(0., 0., 0., 1.);
@@ -73,7 +71,22 @@
         vec3 v_light = normalize(p_light - ph);
 
         float cos = (dot(n, v_light) + 1.0) / 2.0;
-        float t = (cos - dark) / (bright - dark);
+        float color_dark;
+        float color_bright;
+
+        if (dark > bright) {
+            color_dark = bright;
+            color_bright = dark;
+        } else {
+            color_dark = dark;
+            color_bright = bright;
+            if (dark == bright) {
+                color_bright += 0.001;
+            }
+        }
+
+        float t = (cos - color_dark) / (color_bright - color_dark);
+
         if (t > 1.0)
             t = 1.0;
         if (t < 0.0)
@@ -101,8 +114,7 @@
         float a02, float a12, float a22, float a21, float a00,
         float s0, float s1, float s2,
         vec3 v2, vec3 vup, vec3 pc,
-        vec3 pe, vec3 npe,
-        vec3 ph) {
+        vec3 pe, vec3 npe) {
 
         // find roots
         vec3 n0 = normalize(cross(vup, v2));
@@ -119,29 +131,28 @@
             vec3 ph = pe + th * npe;
             vec3 fp = 2.0 * a02 * n0 * dot(n0, ph - pc) / (s0 * s0) + 2.0 * a12 * n1 * dot(n1, ph - pc) / (s1 * s1) + 2.0 * a22 * n2 * dot(n2, ph - pc) / (s2 * s2) + a21 * n2 / s2;
             fp = normalize(fp);
-            return diffuse(fp, ph) + vec4(spec(fp, npe, ph), 1.);;
+            return diffuse(fp, ph) + vec4(spec(fp, npe, ph), 1.);
         } else {
-            return u_color;
+            return vec4(0., 0., 0., 1.);
         }
     }
 
     void main() {
-        vec3 pi = vec3(0.0, 0.0, 0.0);
-        vec3 ph = vec3(v_position[0], v_position[1], v_position[2]);
-        vec3 npe = normalize(ph - pe);
+        vec3 p = vec3(v_position[0], v_position[1], v_position[2]);
+        vec3 pe = vec3(coordinate[0], coordinate[1], coordinate[2]);
+
+        // quadrics parameters --------------------------------------------------------------
+        vec3 pi = vec3(0.0, 0.0, 0.0); // sphere center
+        vec3 npe = normalize(p - pe);
         vec3 v2 = vec3(0., 0., 1.);
         vec3 vup = vec3(1., 0., 0.);
 
-        vec4 color = general_quadrics(1., 1., 1., 0., -1., r, r, r, v2, vup, pi, pe, npe, ph);
+        vec4 color = general_quadrics(1., 1., 1., 0., -1., r, r, r, v2, vup, pi, pe, npe);
+
         gl_FragColor = color;
     }
-</script><!--
-for most samples webgl-utils only provides shader compiling/linking and
-canvas resizing because why clutter the examples with code that's the same in every sample.
-See https://webglfundamentals.org/webgl/lessons/webgl-boilerplate.html
-and https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
-for webgl-utils, m3, m4, and webgl-lessons-ui.
--->
+</script>
+
 <script src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
 <script src="https://webglfundamentals.org/webgl/resources/webgl-lessons-ui.js"></script>
 <script src="script.js"></script>
