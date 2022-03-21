@@ -278,7 +278,32 @@ sampleButtons = function () {
 
 
         }
+        
+        if ($(this).text() === "Varda - Glass") {
+            initParameters();
 
+            alphaR=0.0;
+            image1.src = linkPrefix + "images/varda/Glass_D.png";
+            image2.src = linkPrefix + "images/varda/Glass_L.png";
+            image3.src = linkPrefix + "images/varda/Glass_N.png"; //shape map
+            image4.src = linkPrefix + "images/varda/fish1.jpg";  //reflection
+            image5.src = linkPrefix + "images/white.png";  //refraction
+            image6.src = linkPrefix + "images/white.png"; //alpha
+
+        }
+
+        if ($(this).text() === "Varda - Sphere") {
+            initParameters();
+
+            alphaR=0.0;
+            image1.src = linkPrefix + "images/white.png";
+            image2.src = linkPrefix + "images/white.png";
+            image3.src = linkPrefix + "images/varda/Sphere_N.png"; //shape map
+            image4.src = linkPrefix + "images/varda/starry.jpg";  //reflection
+            image5.src = linkPrefix + "images/white.png";  //refraction
+            image6.src = linkPrefix + "images/reflect_red.png"; //alpha
+
+        }
 
         /*if($(this).text() ==="Jar")
         {
