@@ -243,8 +243,8 @@ sampleButtons = function () {
             image2.src = linkPrefix + "images/girl/di1.png";//bright
             image3.src = linkPrefix + "images/girl/sm.png"; //shape map
             image4.src = linkPrefix + "images/dark.png";  //reflection
-            image5.src = linkPrefix + "images/dark.png";  //refraction
-            image6.src = linkPrefix + "images/white.png"; //alpha
+            image5.src = linkPrefix + "images/girl/bg3.jpg";  //refraction
+            image6.src = linkPrefix + "images/girl/sm.png"; //alpha
 
 
         }
