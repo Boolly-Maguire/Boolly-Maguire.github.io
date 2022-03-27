@@ -1,257 +1,448 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/html">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Ray Casting</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/spectrum/1.8.0/spectrum.min.css">
-</head>
-<div class="header">
-    Ray Casting
-</div>
-<div id="sidebar" class="sidebar">
-    <br><br>
-    <p>The Sphere is placed at (0,0,0), with Radius = <span id="r_value"></span></p>
-    <p>Radius of Sphere 0.05 <input type="range" min="0.005" max="0.05" value="0.05" class="myslider" step="0.0001"
-                                    id="r"> 0.05</p>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
 
-    <p>Bright/Dark Diffuse Style <input type="range" min="0.0" max="1.0" value="0.8" class="myslider" step="0.0001"
-                                   id="bright"></p>
-    <p>Bright/Dark Diffuse Style <input type="range" min="0.0" max="1.0" value="0.2" class="myslider" step="0.0001"
-                                 id="dark"></p>
-    <p>Specular Sharpness <input type="range" min="0.01" max="1.0" value="0.2" class="myslider" step="0.0001"
-                                 id="sharp"></p>
-    <p>Light Color <input type="color" id="color" value="#ffffff"></p>
-    ---------------------------------------------------------------------------------------
-    <p>Cartesian Coordinate</p>
-    <img src="xyz.jpg" width="150">
-    <br><br>
-    <p>z<input type="range" min="-1.0" max="1.0" value="1" class="myslider" step="0.0001" id="z">
-    </p>
+    <title>Mock3d-Template</title>
 
-    <p>y<input type="range" min="-1.0" max="1.0" value="0" class="myslider" step="0.0001"
-                                 id="y"></p>
+    <!-- Google font -->
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300' rel='stylesheet' type='text/css'>
 
-    <p>x<input type="range" min="-1.0" max="1.0" value="0" class="myslider" step="0.0001"
-                                 id="x"></p>
-    <p> (x, y, z) = ( <span id="x_value"></span>, <span id="y_value"></span>, <span id="z_value"></span> ) </p>
-    <br>
-</div>
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.css" rel="stylesheet"> <!--have bootstrap.min.css-->
+    <link href="css/offcanvas.css" rel="stylesheet">
+    <link href="css/bootstrap-slider.css" rel="stylesheet">
+    <link href="css/jquery.minicolors.css" rel="stylesheet">
 
-<canvas id="canvas"></canvas>
-<!-- vertex shader -->
-<script id="vertex-shader-3d" type="x-shader/x-vertex">
-    attribute vec4 a_position;
-    attribute vec2 texcoord;
-    varying vec4 v_position;
 
-    void main() {
-        v_position = a_position;
-        gl_Position = a_position;
-    }
-</script>
+    <!-- Custom styles for this template -->
+    <link href="css/mock3d.css" rel="stylesheet">
 
-<!-- fragment shader -->
-<script id="fragment-shader-3d" type="x-shader/x-fragment">
-    precision mediump float;
-    #define MAX_TH 10000000.0
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        #define max_lights 14
 
-    varying vec4 v_position;
+        attribute vec4 vPosition;
+        attribute vec2 texcoord;
 
-    uniform vec3 color;
-    uniform float r;
-    uniform float bright;
-    uniform float dark;
-    uniform float sharp;
+        varying vec2 f_texcoord;
 
-    uniform vec3 coordinate; // xyz coordinate
-    vec3 p_light = vec3(1., 1., 1.); // light position
+//        varying vec3 pLight[max_lights];
+        varying float lightN;
 
-    vec4 diffuse(vec3 n, vec3 ph) {
-        vec4 result = vec4(0., 0., 0., 1.);
+        uniform float lightNum;
 
-        vec3 v_light = normalize(p_light - ph);
+        varying vec4 v_position;
 
-        float cos = (dot(n, v_light) + 1.0) / 2.0;
-        float color_dark;
-        float color_bright;
 
-        if (dark > bright) {
-            color_dark = bright;
-            color_bright = dark;
-        } else {
-            color_dark = dark;
-            color_bright = bright;
-            if (dark == bright) {
-                color_bright += 0.001;
+        void main() {
+
+            gl_Position = vPosition;
+            v_position = vPosition;
+//            for (int i = 0; i < max_lights; i++) {
+//                if (float(i) < float(lightNum)) {
+//                    pLight[i] = vec3(1., 1., 1.);
+//                } else {
+//                    break;
+//                }
+//            }
+            lightN = lightNum;
+            f_texcoord = texcoord;
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        #define max_lights 14
+        #define MAX_TH 10000000.0
+
+        precision mediump float;
+
+        varying vec2 f_texcoord;
+        varying vec4 v_position;
+
+        varying float lightN;
+
+//        varying vec3 pLight[max_lights];
+
+        uniform sampler2D uSamplerTexture;
+
+        uniform int currentLight;
+
+        uniform bool lightsOnly;
+
+        uniform vec3 lightColor[max_lights];
+
+        uniform float styleBright, styleDark;
+
+        uniform float coordX, coordY, coordZ;
+
+        uniform float sharpness;
+
+        float r = 0.05;
+        vec3 p_light = vec3(1., 1., 1.);
+
+        vec4 diffuse(vec3 n, vec3 ph) {
+            vec4 result = vec4(0., 0., 0., 1.);
+
+            vec3 v_light = normalize(p_light - ph);
+
+            float cos = (dot(n, v_light) + 1.0) / 2.0;
+
+            float t = (cos - styleDark) / (styleBright - styleDark);
+
+            if (t > 1.0)
+            t = 1.0;
+            if (t < 0.0)
+            t = 0.0;
+
+            result += t * vec4(lightColor[0], 1.0);
+            return result;
+        }
+
+        vec3 spec(vec3 n, vec3 npe, vec3 ph) {
+            vec3 spec = vec3(0.0, 0.0, 0.0);
+
+            vec3 v_light = normalize(p_light - ph);
+
+            vec3 RVector = -v_light + 2.0 * dot(n, v_light) * n;
+            float temp = dot(RVector, -npe);
+            if (temp < 0.0)
+                temp = 0.0;
+            float specular = pow(temp, sharpness * 100.);
+            spec += lightColor[0] * specular;
+            return spec;
+        }
+
+        float general_quadrics_th(
+        float a02, float a12, float a22, float a21, float a00,
+        float s0, float s1, float s2,
+        vec3 v2, vec3 vup, vec3 pc,
+        vec3 pe, vec3 npe) {
+
+            // find roots
+            vec3 n0 = normalize(cross(vup, v2));
+            vec3 n1 = normalize(cross(n0, v2));
+            vec3 n2 = normalize(v2);
+
+            float A = a02 * dot(n0, npe) * dot(n0, npe) / (s0 * s0) + a12 * dot(n1, npe) * dot(n1, npe) / (s1 * s1) + a22 * dot(n2, npe) * dot(n2, npe) / (s2 * s2);
+            float B = 2.0 * a02 * dot(n0, npe) * dot(n0, pe - pc) / (s0 * s0) + 2.0 * a12 * dot(n1, npe) * dot(n1, pe - pc) / (s1 * s1) + 2.0 * a22 * dot(n2, npe) * dot(n2, pe - pc) / (s2 * s2) + a21 * dot(n2, npe) / s2;
+            float C = a02 * dot(n0, pe - pc) * dot(n0, pe - pc) / (s0 * s0) + a12 * dot(n1, pe - pc) * dot(n1, pe - pc) / (s1 * s1) + a22 * dot(n2, pe - pc) * dot(n2, pe - pc) / (s2 * s2) + a21 * dot(n2, pe - pc) / s2 + a00;
+            float delta = B * B - 4.0 * A * C;
+
+            if (delta >= 0.0 && -B - sqrt(delta) >= 0.0) {
+                float th = (-B - sqrt(delta)) / (2.0 * A);
+                return th;
+            } else {
+                return MAX_TH;
             }
         }
 
-        float t = (cos - color_dark) / (color_bright - color_dark);
-
-        if (t > 1.0)
-            t = 1.0;
-        if (t < 0.0)
-            t = 0.0;
-
-        result += t * vec4(color, 1.0);
-        return result;
-    }
-
-    vec3 spec(vec3 n, vec3 npe, vec3 ph) {
-        vec3 spec = vec3(0.0, 0.0, 0.0);
-
-        vec3 v_light = normalize(p_light - ph);
-
-        vec3 RVector = -v_light + 2.0 * dot(n, v_light) * n;
-        float temp = dot(RVector, -npe);
-        if (temp < 0.0)
-            temp = 0.0;
-        float specular = pow(temp, sharp * 100.);
-        spec += color * specular;
-        return spec;
-    }
-
-    float general_quadrics_th(
+        vec4 general_quadrics(
         float a02, float a12, float a22, float a21, float a00,
         float s0, float s1, float s2,
         vec3 v2, vec3 vup, vec3 pc,
         vec3 pe, vec3 npe) {
 
-        // find roots
-        vec3 n0 = normalize(cross(vup, v2));
-        vec3 n1 = normalize(cross(n0, v2));
-        vec3 n2 = normalize(v2);
+            // find roots
+            vec3 n0 = normalize(cross(vup, v2));
+            vec3 n1 = normalize(cross(n0, v2));
+            vec3 n2 = normalize(v2);
 
-        float A = a02 * dot(n0, npe) * dot(n0, npe) / (s0 * s0) + a12 * dot(n1, npe) * dot(n1, npe) / (s1 * s1) + a22 * dot(n2, npe) * dot(n2, npe) / (s2 * s2);
-        float B = 2.0 * a02 * dot(n0, npe) * dot(n0, pe - pc) / (s0 * s0) + 2.0 * a12 * dot(n1, npe) * dot(n1, pe - pc) / (s1 * s1) + 2.0 * a22 * dot(n2, npe) * dot(n2, pe - pc) / (s2 * s2) + a21 * dot(n2, npe) / s2;
-        float C = a02 * dot(n0, pe - pc) * dot(n0, pe - pc) / (s0 * s0) + a12 * dot(n1, pe - pc) * dot(n1, pe - pc) / (s1 * s1) + a22 * dot(n2, pe - pc) * dot(n2, pe - pc) / (s2 * s2) + a21 * dot(n2, pe - pc) / s2 + a00;
-        float delta = B * B - 4.0 * A * C;
+            float A = a02 * dot(n0, npe) * dot(n0, npe) / (s0 * s0) + a12 * dot(n1, npe) * dot(n1, npe) / (s1 * s1) + a22 * dot(n2, npe) * dot(n2, npe) / (s2 * s2);
+            float B = 2.0 * a02 * dot(n0, npe) * dot(n0, pe - pc) / (s0 * s0) + 2.0 * a12 * dot(n1, npe) * dot(n1, pe - pc) / (s1 * s1) + 2.0 * a22 * dot(n2, npe) * dot(n2, pe - pc) / (s2 * s2) + a21 * dot(n2, npe) / s2;
+            float C = a02 * dot(n0, pe - pc) * dot(n0, pe - pc) / (s0 * s0) + a12 * dot(n1, pe - pc) * dot(n1, pe - pc) / (s1 * s1) + a22 * dot(n2, pe - pc) * dot(n2, pe - pc) / (s2 * s2) + a21 * dot(n2, pe - pc) / s2 + a00;
+            float delta = B * B - 4.0 * A * C;
 
-        if (delta >= 0.0 && -B - sqrt(delta) >= 0.0) {
-            float th = (-B - sqrt(delta)) / (2.0 * A);
-            return th;
-        } else {
-            return MAX_TH;
+            if (delta >= 0.0 && -B - sqrt(delta) >= 0.0) {
+                float th = (-B - sqrt(delta)) / (2.0 * A);
+                vec3 ph = pe + th * npe;
+                vec3 fp = 2.0 * a02 * n0 * dot(n0, ph - pc) / (s0 * s0) + 2.0 * a12 * n1 * dot(n1, ph - pc) / (s1 * s1) + 2.0 * a22 * n2 * dot(n2, ph - pc) / (s2 * s2) + a21 * n2 / s2;
+                fp = normalize(fp);
+                return diffuse(fp, ph) + vec4(spec(fp, npe, ph), 1.);
+            } else {
+                return vec4(0., 0., 0., 1.);
+            }
         }
-    }
-
-    vec4 general_quadrics(
-        float a02, float a12, float a22, float a21, float a00,
-        float s0, float s1, float s2,
-        vec3 v2, vec3 vup, vec3 pc,
-        vec3 pe, vec3 npe) {
-
-        // find roots
-        vec3 n0 = normalize(cross(vup, v2));
-        vec3 n1 = normalize(cross(n0, v2));
-        vec3 n2 = normalize(v2);
-
-        float A = a02 * dot(n0, npe) * dot(n0, npe) / (s0 * s0) + a12 * dot(n1, npe) * dot(n1, npe) / (s1 * s1) + a22 * dot(n2, npe) * dot(n2, npe) / (s2 * s2);
-        float B = 2.0 * a02 * dot(n0, npe) * dot(n0, pe - pc) / (s0 * s0) + 2.0 * a12 * dot(n1, npe) * dot(n1, pe - pc) / (s1 * s1) + 2.0 * a22 * dot(n2, npe) * dot(n2, pe - pc) / (s2 * s2) + a21 * dot(n2, npe) / s2;
-        float C = a02 * dot(n0, pe - pc) * dot(n0, pe - pc) / (s0 * s0) + a12 * dot(n1, pe - pc) * dot(n1, pe - pc) / (s1 * s1) + a22 * dot(n2, pe - pc) * dot(n2, pe - pc) / (s2 * s2) + a21 * dot(n2, pe - pc) / s2 + a00;
-        float delta = B * B - 4.0 * A * C;
-
-        if (delta >= 0.0 && -B - sqrt(delta) >= 0.0) {
-            float th = (-B - sqrt(delta)) / (2.0 * A);
-            vec3 ph = pe + th * npe;
-            vec3 fp = 2.0 * a02 * n0 * dot(n0, ph - pc) / (s0 * s0) + 2.0 * a12 * n1 * dot(n1, ph - pc) / (s1 * s1) + 2.0 * a22 * n2 * dot(n2, ph - pc) / (s2 * s2) + a21 * n2 / s2;
-            fp = normalize(fp);
-            return diffuse(fp, ph) + vec4(spec(fp, npe, ph), 1.);
-        } else {
-            return vec4(0., 0., 0., 1.);
-        }
-    }
-
-    void main() {
-        vec3 p = vec3(v_position[0], v_position[1], v_position[2]);
-        vec3 pe = vec3(coordinate[0], coordinate[1], coordinate[2]);
-
-        // quadrics parameters --------------------------------------------------------------
-        vec3 npe = normalize(p - pe);
-        vec3 v2 = vec3(0., 0., 1.);
-        vec3 vup = vec3(1., 0., 0.);
-
-
-        vec3 pc1 = vec3(0.0, 0.0, 0.0);
-        vec3 pc2 = vec3(0.2, 0.4, 0.1);
-        vec3 pc3 = vec3(-0.1, -0.2, 0.1);
-
-        float th_min = MAX_TH;
-        float th1 = general_quadrics_th(1., 1., 1., 0., -1., r, r, r, v2, vup, pc1, pe, npe);
-        float th2 = general_quadrics_th(1., 1., 1., 0., -1., r, r, r, v2, vup, pc2, pe, npe);
-        float th3 = general_quadrics_th(1., 1., 1., 0., -1., r, r, r, v2, vup, pc3, pe, npe);
-        vec4 color;
-        if (th1 < th_min) {
-            color = general_quadrics(1., 1., 1., 0., -1., r, r, r, v2, vup, pc1, pe, npe);
-            th_min = th1;
+        void set_a(int type, out float a02, out float a12, out float a22, out float a21, out float a00)
+        {
+            if (type==1)//ellipsoid
+            { a02=1., a12=1., a22=1., a21=0., a00=-1.; }
+            else if (type==2)//hyperboloid of one sheet
+            { a02=-1., a12=1.0, a22=1., a21=-0., a00=-1.; }
+            else if (type==3)//hyperboloid of 2 sheets
+            { a02=-1., a12=1.0, a22=1., a21=-0., a00=1.; }
+            else if (type==4)//cylinder
+            { a02=0., a12=1., a22=1., a21=0., a00=-1.; }
+            else if (type==5)
+            { a02=1., a12=0., a22=0., a21=-1., a00=-0.; }
         }
 
-        if (th2 < th_min) {
-            color = general_quadrics(1., 1., 1., 0., -1., r, r, r, v2, vup, pc2, pe, npe);
-            th_min = th2;
+        void main() {
+            vec3 p = vec3(v_position[0], v_position[1], v_position[2]);
+            vec3 pe = vec3(coordX, coordY, coordZ);
+
+            // quadrics parameters --------------------------------------------------------------
+            vec3 npe = normalize(p - pe);
+            vec3 v2 = vec3(0., 0., 1.);
+            vec3 vup = vec3(1., 0., 0.);
+
+            vec3 pc1 = vec3(0.20, 0.0, 0.0);
+            vec3 pc2 = vec3(0.15, 0.0, -0.7);
+            vec3 pc3 = vec3(-0.15, -0.0, 0.4);
+            vec3 pc4 = vec3(0.35, 0., 0.);
+            vec3 pc5 = vec3(-0.10, -0.0, 0.2);
+
+            float th_min = MAX_TH;
+            float a02, a12, a22, a21, a00;
+
+            set_a(1, a02, a12, a22, a21, a00);//sphere and ellipsoid
+            float th1 = general_quadrics_th(a02, a12, a22, a21, a00, r, r, r, v2, vup, pc1, pe, npe);
+            float th5 = general_quadrics_th(a02, a12, a22, a21, a00, r*2.0, r, r, v2, vup, pc5, pe, npe);
+
+            set_a(2, a02, a12, a22, a21, a00);//hyperboloid one sheet
+            float th2 = general_quadrics_th(a02, a12, a22, a21, a00, 0.06, 0.03, 0.06, v2, vup, pc2, pe, npe);
+
+            set_a(3, a02, a12, a22, a21, a00);//hyperboloid one sheet
+            float th3 = general_quadrics_th(a02, a12, a22, a21, a00, 0.1, 0.03, 0.1, v2, vup, pc3, pe, npe);
+
+            set_a(4, a02, a12, a22, a21, a00);//cylinder
+            float th4 = general_quadrics_th(a02, a12, a22, a21, a00, 0.03, 0.03, 0.03, v2, vup, pc4, pe, npe);
+
+
+            vec4 color;
+            if (th1 < th_min) {
+                color = general_quadrics(1., 1., 1., 0., -1., r, r, r, v2, vup, pc1, pe, npe);
+                th_min = th1;
+            }
+
+            if (th2 < th_min) {
+                set_a(2, a02, a12, a22, a21, a00);
+                color = general_quadrics(a02, a12, a22, a21, a00, 0.06, 0.03, 0.06, v2, vup, pc2, pe, npe);
+                th_min = th2;
+            }
+
+            if (th3 < th_min) {
+                set_a(3, a02, a12, a22, a21, a00);
+                color = general_quadrics(a02, a12, a22, a21, a00, 0.1, 0.03, 0.1, v2, vup, pc3, pe, npe);
+                th_min = th3;
+            }
+
+            if (th4 < th_min) {
+                set_a(4, a02, a12, a22, a21, a00);
+                color = general_quadrics(a02, a12, a22, a21, a00, 0.03, 0.03, 0.03, v2, vup, pc4, pe, npe);
+                th_min = th4;
+            }
+
+            if (th5 < th_min) {
+                set_a(1, a02, a12, a22, a21, a00);
+                color = general_quadrics(a02, a12, a22, a21, a00, r*2.0, r, r, v2, vup, pc5, pe, npe);
+                th_min = th5;
+            }
+
+            if (th_min == MAX_TH) {
+                color = vec4(0.5, 0.5, 0.5, 1.);
+            }
+            if (v_position[1] > 0.99 || v_position[1] < -0.99) {
+                color = vec4(0.5, 0.5, 0.5, 1.); }
+
+            gl_FragColor = color;
         }
+    </script>
 
-        if (th3 < th_min) {
-            color = general_quadrics(1., 1., 1., 0., -1., r, r, r, v2, vup, pc3, pe, npe);
-            th_min = th3;
-        }
-
-        if (th_min == MAX_TH) {
-            color = vec4(0., 0., 0., 1.);
-        }
-
-        gl_FragColor = color;
-    }
-</script>
-
-<script src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
-<script src="https://webglfundamentals.org/webgl/resources/webgl-lessons-ui.js"></script>
-<script src="script.js"></script>
+    <script type="text/javascript" src="lib/jquery-2.1.4.js"></script>
+    <script type="text/javascript" src="scripts/webgl-utils.js"></script>
+    <script type="text/javascript" src="scripts/initShaders.js"></script>
+    <script type="text/javascript" src="scripts/MV.js"></script>
 
 
-
-<script>
-    var sliderZ = document.getElementById("z");
-    var outputZ = document.getElementById("z_value");
-    outputZ.innerHTML = sliderZ.value;
-
-    sliderZ.oninput = function () {
-        outputZ.innerHTML = this.value;
-    }
-</script>
-
-
-<script>
-    var sliderX = document.getElementById("x");
-    var outputX = document.getElementById("x_value");
-    outputX.innerHTML = sliderX.value;
-
-    sliderX.oninput = function () {
-        outputX.innerHTML = this.value;
-    }
-</script>
-
-<script>
-    var sliderY = document.getElementById("y");
-    var outputY = document.getElementById("y_value");
-    outputY.innerHTML = sliderY.value;
-
-    sliderY.oninput = function () {
-        outputY.innerHTML = this.value;
-    }
-</script>
-
-<script>
-    var sliderR = document.getElementById("r");
-    var outputR = document.getElementById("r_value");
-    outputR.innerHTML = sliderR.value;
-
-    sliderR.oninput = function () {
-        outputR.innerHTML = this.value;
-    }
-</script>
+</head>
 
 <body>
+<!--nav-->
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <ul class="fancyNav">
+        <li><a class="active" href=index.html>3D Objects</a></li>
+    </ul>
+</nav>
+
+<!--content-->
+<div class="container-fluid">
+    <div class="row row-offcanvas row-offcanvas-left">
+        <!--Left Column start-->
+        <div class="col-sm-2 sidebar sidebar-left sidebar-offcanvas">
+
+            <ul class="myAccordion" id="accordion_L">
+                <!--Basic Images-->
+                <li class="panel">
+                    <a class="myControlTitle" data-toggle="collapse" data-parent="#accordion_L" href="#basicImages">
+                        Texture Images
+                    </a>
+                    <div id="basicImages" class="inCollapse collapse in">
+
+                        <div class="imgbox_container">
+                            <h6><span title="Insert or DragnDrop dark image here">Basic Image</span></h6>
+                            <div>
+                                <div id="container" class="imgThumb_container">
+                                    <div class="btn-file">
+                                        <input type="file" id="inputFileToLoad">
+                                    </div>
+                                    <div id="containerImage" class="imgThumb"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h6>Style Control</h6>
+                            <div class="slider_box">
+                                <input id="styleControl_slider" data-slider-id='customSlider' type="text" class="span2"
+                                       value=""/>
+                            </div>
+                            <div>
+                                <div class="h7 inlineBlock">Bright</div>
+                                <div class="h7 pull-right">Dark</div>
+                            </div>
+
+                            <div class="slider_box">
+                                <input id="specSharpness_slider" data-slider-id='customSlider' type="text" class="span2"
+                                       value=""/>
+                            </div>
+                            <div>
+                                <div class="h7 inlineBlock">Specular Sharpness</div>
+                                <div class="h7 pull-right"></div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
+            </ul>
+        </div>
+        <!--Left Column end-->
+        <!--Main Canvas start-->
+        <div class="col-sm-8 main">
+            <!--
+            <p class="pull-left visible-xs">
+               <button type="button" class="btn btn-primary btn-xs" data-toggle="offcanvas">Toggle nav</button>
+            </p>
+            -->
+            <!--
+           <img src="img/solidColor.jpg" class="img-responsive" alt="our canvas">
+           -->
+            <div class="canvas_container">
+                <canvas id="gl-canvas">
+                    Oops ... your browser doesn't support the HTML5 canvas element
+                </canvas>
+
+                <svg id="lightPosition_container" xmlns="http://www.w3.org/2000/svg">
+
+
+                </svg>
+
+            </div>
+
+        </div>
+        <!--Main Canvas end-->
+
+        <!--Right column start-->
+        <div class="col-sm-2 sidebar sidebar-right">
+            <ul class="myAccordion" id="accordion_R">
+                <!--Light-->
+                <li class="panel">
+                    <a class="myControlTitle collapsed" data-toggle="collapse" data-parent="#accordion_R"
+                       href="#lightControl">
+                        Light
+                    </a>
+                    <div id="lightControl" class="inCollapse collapse">
+                        <div class="btn_container">
+                            <button class="btn btn-block" id="btn_addLight">ADD LIGHT</button>
+                        </div>
+                        <div id="lights_container">
+                            <ul class="myAccordion" id="accordion_Lights">
+
+                            </ul>
+                        </div>
+                    </div>
+                </li>
+
+                <li class="panel">
+                    <a class="myControlTitle collapsed" data-toggle="collapse" data-parent="#accordion_R"
+                       href="#coordinate">
+                        Coordinate
+                    </a>
+                    <div id="coordinate" class="inCollapse collapse">
+                        <div class="slider_container">
+                            <span class="h6 inlineBlock"> Z </span>
+                            <div class="pull-right">
+                                <input type="text" class="form-control mytextbox text-center" id="coord_Z">
+                            </div>
+                            <div class="slider_box">
+                                <input id="Z_slider" data-slider-id='customSlider' type="text"/>
+                            </div>
+                        </div>
+                        <!--                        <div class="slider_container">-->
+                        <!--                            <span class="h6 inlineBlock"> Y </span>-->
+                        <!--                            <div class="pull-right">-->
+                        <!--                                <input type="text" class="form-control mytextbox text-center" id="coord_Y">-->
+                        <!--                            </div>-->
+                        <!--                            <div class="slider_box">-->
+                        <!--                                <input id="Y_slider" data-slider-id='customSlider' type="text"/>-->
+                        <!--                            </div>-->
+                        <!--                        </div>-->
+                        <!--                        <div class="slider_container">-->
+                        <!--                            <span class="h6 inlineBlock"> X </span>-->
+                        <!--                            <div class="pull-right">-->
+                        <!--                                <input type="text" class="form-control mytextbox text-center" id="coord_X">-->
+                        <!--                            </div>-->
+                        <!--                            <div class="slider_box">-->
+                        <!--                                <input id="X_slider" data-slider-id='customSlider' type="text"/>-->
+                        <!--                            </div>-->
+                        <!--                        </div>-->
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <!--Right column end-->
+    </div>
+</div>
+
+
+<!-- light templete -->
+<script type="text/template" data-template="light">
+    <li class="panel" data-id="{{id}}" id="lightPanel{{id}}">
+        <a class="myControlTitle myLightsTitle collapsed" data-toggle="collapse" data-parent="#accordion_Lights"
+           href="#light{{id}}">
+            <div class="destroy"></div>
+            LIGHT{{id}}
+        </a>
+        <div id="light{{id}}" class="lightBox inCollapse collapse">
+            <div>
+                <span class="h6 inlineBlock"> Color </span>
+                <div class="pull-right">
+                    <input class="colorPicker" type="hidden">
+                </div>
+            </div>
+        </div>
+    </li>
+
+</script>
+
+<!-- Bootstrap core JavaScript  ================================================== -->
+<script src="lib/bootstrap.min.js"></script>
+<script src="lib/bootstrap-slider.js"></script>
+
+<!--colorpicker-->
+<script src="lib/jquery.minicolors.min.js"></script>
+
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="lib/ie10-viewport-bug-workaround.js"></script>
+
+<!-- More -->
+<script type="text/javascript" src="scripts/dragndrop.js"></script>
+<script type="text/javascript" src="scripts/cube.js"></script>
+<script type="text/javascript" src="scripts/sliders.js"></script>
+<script type="text/javascript" src="scripts/addLight.js"></script>
+
 </body>
 </html>
