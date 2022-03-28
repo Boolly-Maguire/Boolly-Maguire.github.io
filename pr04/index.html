@@ -80,7 +80,7 @@
 
         uniform float coordX, coordY, coordZ;
 
-        uniform float sharpness;
+        uniform float specSharpness, specBlurriness;
 
         float r = 0.05;
         vec3 p_light = vec3(1., 1., 1.);
@@ -112,7 +112,10 @@
             float temp = dot(RVector, -npe);
             if (temp < 0.0)
                 temp = 0.0;
-            float specular = pow(temp, sharpness * 100.);
+
+            float sharpness = (1.0 - specBlurriness) / (specSharpness - specBlurriness);
+
+            float specular = pow(temp, sharpness);
             spec += lightColor[0] * specular;
             return spec;
         }
@@ -301,8 +304,8 @@
                                        value=""/>
                             </div>
                             <div>
-                                <div class="h7 inlineBlock">Bright</div>
-                                <div class="h7 pull-right">Dark</div>
+                                <div class="h7 inlineBlock">Dark</div>
+                                <div class="h7 pull-right">Bright</div>
                             </div>
 
                             <div class="slider_box">
@@ -310,8 +313,8 @@
                                        value=""/>
                             </div>
                             <div>
-                                <div class="h7 inlineBlock">Specular Sharpness</div>
-                                <div class="h7 pull-right"></div>
+                                <div class="h7 inlineBlock">Specular Blurriness</div>
+                                <div class="h7 pull-right">Specular Sharpness</div>
                             </div>
                         </div>
                     </div>

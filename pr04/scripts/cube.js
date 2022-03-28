@@ -14,7 +14,7 @@ lightColor[0] = [1.0, 1.0, 1.0];
 var styleBright,
     styleDark;
 
-var sharpness;
+var specSharpness, specBlurriness;
 
 function initParameters() {
     lightColor[0] = [1.0, 1.0, 1.0];
@@ -27,7 +27,8 @@ function initParameters() {
     coordY = 0.0;
     coordX = 0.0;
 
-    sharpness = 0.2;
+    specSharpness = 1.0;
+    specBlurriness = 0.0;
 }
 
 
@@ -39,7 +40,7 @@ var lightNumLoc;
 var lightColorLoc;
 
 var styleBrightLoc, styleDarkLoc;
-var sharpnessLoc;
+var specSharpnessLoc, specBlurrinessLoc;
 
 var coordZLoc;
 var coordYLoc;
@@ -141,7 +142,8 @@ window.onload = function init() {
     coordYLoc = gl.getUniformLocation(program, "coordY");
     coordXLoc = gl.getUniformLocation(program, "coordX");
 
-    sharpnessLoc = gl.getUniformLocation(program, "sharpness");
+    specSharpnessLoc = gl.getUniformLocation(program, "specSharpness");
+    specBlurrinessLoc = gl.getUniformLocation(program, "specBlurriness");
 
     currentLightLoc = gl.getUniformLocation(program, "currentLight");
     lightNumLoc = gl.getUniformLocation(program, "lightNum");
@@ -178,7 +180,8 @@ function render() {
     gl.uniform1f(coordZLoc, coordZ);
     gl.uniform1f(coordYLoc, coordY);
     gl.uniform1f(coordXLoc, coordX);
-    gl.uniform1f(sharpnessLoc, sharpness);
+    gl.uniform1f(specSharpnessLoc, specSharpness);
+    gl.uniform1f(specBlurrinessLoc, specBlurriness);
 
 
     gl.uniform1i(currentLightLoc, currentLight);

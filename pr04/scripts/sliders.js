@@ -32,9 +32,10 @@ $(document).ready(function () {
         styleDark = slideEvt.value[1];
     });
 
-    $("#specSharpness_slider").slider({min: 0.01, max: 0.1, value: sharpness, step: 0.001, focus: true});
+    $("#specSharpness_slider").slider({min: 0.0, max: 0.1, value: [specSharpness, specBlurriness], step: 0.001, focus: true});
     $("#specSharpness_slider").on("slide", function (slideEvt) {
-        sharpness = slideEvt.value;
+        specBlurriness = slideEvt.value[0];
+        specSharpness = slideEvt.value[1];
     });
 
 });//end of $(document).ready
