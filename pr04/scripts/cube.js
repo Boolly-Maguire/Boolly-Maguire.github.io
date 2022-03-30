@@ -16,6 +16,8 @@ var styleBright,
 
 var specSharpness, specBlurriness;
 
+var checkAreaLight;
+
 function initParameters() {
     lightColor[0] = [1.0, 1.0, 1.0];
     lightNum = 1;
@@ -29,6 +31,8 @@ function initParameters() {
 
     specSharpness = 1.0;
     specBlurriness = 0.0;
+
+    checkAreaLight = 0;
 }
 
 
@@ -45,6 +49,8 @@ var specSharpnessLoc, specBlurrinessLoc;
 var coordZLoc;
 var coordYLoc;
 var coordXLoc;
+
+var checkAreaLightLoc;
 
 /****************** For Basic shader ******************/
 
@@ -88,7 +94,7 @@ window.onload = function init() {
     gl.useProgram(program);
 
     /* Vertex colors
-    // Load the data into the GPU   
+    // Load the data into the GPU
     var cBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, cBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, flatten(colors), gl.STATIC_DRAW );
@@ -153,6 +159,8 @@ window.onload = function init() {
     styleBrightLoc = gl.getUniformLocation(program, "styleBright");
     styleDarkLoc = gl.getUniformLocation(program, "styleDark");
 
+    checkAreaLightLoc = gl.getUniformLocation(program, "checkAreaLight");
+
     render();
 };
 
@@ -177,6 +185,9 @@ function handleTextureLoaded(image, texture) {
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    var checkAreaLightElem = $('#checkAreaLightSelect:checked');
+    checkAreaLight = (checkAreaLightElem.val()) ? 1 : 0;
+
     gl.uniform1f(coordZLoc, coordZ);
     gl.uniform1f(coordYLoc, coordY);
     gl.uniform1f(coordXLoc, coordX);
@@ -191,6 +202,8 @@ function render() {
 
     gl.uniform1f(styleBrightLoc, styleBright);
     gl.uniform1f(styleDarkLoc, styleDark);
+
+    gl.uniform1i(checkAreaLightLoc, checkAreaLight);
 
     gl.drawArrays(gl.TRIANGLES, 0, numVertices);
 

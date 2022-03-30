@@ -56,7 +56,7 @@
     </script>
 
     <script id="fragment-shader" type="x-shader/x-fragment">
-        #define max_lights 14
+        #define max_lights 17
         #define MAX_TH 10000000.0
 
         precision mediump float;
@@ -74,6 +74,8 @@
 
         uniform bool lightsOnly;
 
+        uniform bool checkAreaLight;
+
         uniform vec3 lightColor[max_lights];
 
         uniform float styleBright, styleDark;
@@ -83,41 +85,102 @@
         uniform float specSharpness, specBlurriness;
 
         float r = 0.05;
+
+        const int N = 5;
+        const int M = 7;
+
         vec3 p_light = vec3(1., 1., 1.);
 
         vec4 diffuse(vec3 n, vec3 ph) {
             vec4 result = vec4(0., 0., 0., 1.);
 
-            vec3 v_light = normalize(p_light - ph);
+            if (checkAreaLight){
+                float t[1000];
+                float T = 0.;
 
-            float cos = (dot(n, v_light) + 1.0) / 2.0;
+                vec3 n0 = vec3(1., 0., 0.);
+                vec3 n1 = vec3(0., 1., 0.);
 
-            float t = (cos - styleDark) / (styleBright - styleDark);
+                for (int i = 0; i < N; i++) {
+                    for (int j = 0; j < M; j ++){
+                        float i_float = float(i);
+                        float j_float = float(j);
+                        vec3 p_light_tmp = p_light + i_float * n0 + j_float * n1;
+                        vec3 v_light = normalize(p_light_tmp - ph);
 
-            if (t > 1.0)
-            t = 1.0;
-            if (t < 0.0)
-            t = 0.0;
+                        float cos = (dot(n, v_light) + 1.0) / 2.0;
+                        float t_tmp = (cos - styleDark) / (styleBright - styleDark);
 
-            result += t * vec4(lightColor[0], 1.0);
-            return result;
+                        if (t_tmp > 1.0)
+                        t_tmp = 1.0;
+                        if (t_tmp < 0.0)
+                        t_tmp = 0.0;
+                        t[ i * N + j]  = t_tmp;
+                        T += t_tmp;
+                    }
+                }
+                T /= float(N * M);
+                result += T * vec4(lightColor[0], 1.0);
+                return result;
+            } else {
+                vec3 v_light = normalize(p_light - ph);
+
+                float cos = (dot(n, v_light) + 1.0) / 2.0;
+
+                float t = (cos - styleDark) / (styleBright - styleDark);
+
+                if (t > 1.0)
+                t = 1.0;
+                if (t < 0.0)
+                t = 0.0;
+
+                result += t * vec4(lightColor[0], 1.0);
+                return result;
+            }
         }
 
         vec3 spec(vec3 n, vec3 npe, vec3 ph) {
             vec3 spec = vec3(0.0, 0.0, 0.0);
+            if (checkAreaLight){
+                vec3 n0 = vec3(1., 0., 0.);
+                vec3 n1 = vec3(0., 1., 0.);
+                float S = 0.;
 
-            vec3 v_light = normalize(p_light - ph);
+                for (int i = 0; i < N; i++) {
+                    for (int j = 0; j < M; j ++){
+                        float i_float = float(i);
+                        float j_float = float(j);
+                        vec3 p_light_tmp = p_light + i_float * n0 + j_float * n1;
+                        vec3 v_light = normalize(p_light_tmp - ph);
+                        vec3 RVector = -v_light + 2.0 * dot(n, v_light) * n;
+                        float temp = dot(RVector, -npe);
+                        if (temp < 0.0)
+                            temp = 0.0;
 
-            vec3 RVector = -v_light + 2.0 * dot(n, v_light) * n;
-            float temp = dot(RVector, -npe);
-            if (temp < 0.0)
-                temp = 0.0;
+                        float sharpness = (1.0 - specBlurriness) / (specSharpness - specBlurriness);
 
-            float sharpness = (1.0 - specBlurriness) / (specSharpness - specBlurriness);
+                        float specular = pow(temp, sharpness);
+                        S += specular;
+                    }
+                }
+                S /= float(N * M);
+                spec += lightColor[0] * S;
+                return spec;
+            } else {
 
-            float specular = pow(temp, sharpness);
-            spec += lightColor[0] * specular;
-            return spec;
+                vec3 v_light = normalize(p_light - ph);
+
+                vec3 RVector = -v_light + 2.0 * dot(n, v_light) * n;
+                float temp = dot(RVector, -npe);
+                if (temp < 0.0)
+                    temp = 0.0;
+
+                float sharpness = (1.0 - specBlurriness) / (specSharpness - specBlurriness);
+
+                float specular = pow(temp, sharpness);
+                spec += lightColor[0] * specular;
+                return spec;
+            }
         }
 
         float general_quadrics_th(int type,
@@ -130,7 +193,7 @@
             vec3 n0 = normalize(cross(vup, v2));
             vec3 n1 = normalize(cross(n0, v2));
             vec3 n2 = normalize(v2);
-            
+
             if (type==5)   //plane
             {
                 float th;
@@ -162,7 +225,7 @@
             vec3 n0 = normalize(cross(vup, v2));
             vec3 n1 = normalize(cross(n0, v2));
             vec3 n2 = normalize(v2);
-            
+
             if(type==5)
             {
                 float th;
@@ -233,7 +296,7 @@
 
             set_a(4, a02, a12, a22, a21, a00);//cylinder
             float th4 = general_quadrics_th(4,a02, a12, a22, a21, a00, 0.03, 0.03, 0.03, v2, vup, pc4, pe, npe);
-            
+
             set_a(5,a02,  a12,  a22,  a21,  a00); //cylinder
             float th6 = general_quadrics_th(5,a02,  a12,  a22,  a21,  a00,1.,1.,1., v2, vup, pc6, pe, npe);
 
@@ -268,7 +331,7 @@
                 color = general_quadrics(1,a02, a12, a22, a21, a00, r*2.0, r, r, v2, vup, pc5, pe, npe);
                 th_min = th5;
             }
-            
+
             if (th6 < th_min) {
                 set_a(5,a02,  a12,  a22,  a21,  a00); //cylinder
                 color = general_quadrics(5,a02,  a12,  a22,  a21,  a00,1.,1.,1., v2, vup, pc6, pe, npe);
@@ -389,6 +452,15 @@
                     <div id="lightControl" class="inCollapse collapse">
                         <div class="btn_container">
                             <button class="btn btn-block" id="btn_addLight">ADD LIGHT</button>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <span class="h6 inlineBlock"> Area Light </span>
+                                <div class="checkbox_container pull-right">
+                                    <input type="checkbox" id="checkAreaLightSelect">
+                                    <div class="pseudoCheckbox"></div>
+                                </div>
+                            </label>
                         </div>
                         <div id="lights_container">
                             <ul class="myAccordion" id="accordion_Lights">

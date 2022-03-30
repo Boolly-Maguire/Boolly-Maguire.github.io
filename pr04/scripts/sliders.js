@@ -38,6 +38,10 @@ $(document).ready(function () {
         specSharpness = slideEvt.value[1];
     });
 
+    /*********************CheckBox**********************************/
+    var checkAreaLightElem = $('#checkAreaLightSelect');
+    initCheckbox(checkAreaLight, checkAreaLightElem);
+
 });//end of $(document).ready
 
 
