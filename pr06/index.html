@@ -225,7 +225,6 @@
             vec3 n0 = normalize(cross(vup, v2));
             vec3 n1 = normalize(cross(n0, v2));
             vec3 n2 = normalize(v2);
-            vec4 c = texture2D(uSamplerTexture, vec2(f_texcoord.s, f_texcoord.t));
 
             if(type==5)
             {
@@ -234,6 +233,18 @@
                 vec3 ph = pe + th * npe;
                 vec3 fp = 2.0 * a02 * n0 * dot(n0, ph - pc) / (s0 * s0) + 2.0 * a12 * n1 * dot(n1, ph - pc) / (s1 * s1) + 2.0 * a22 * n2 * dot(n2, ph - pc) / (s2 * s2) + a21 * n2 / s2;
                 fp = normalize(fp);
+
+                float x = dot(n0, ph - pc);
+                float y = dot(n1, ph - pc);
+                float u = x - float(floor(x));
+                if (x < 0.0)
+                u = 1.0 - u;
+                float v = y - float(floor(y));
+                if (y < 0.0)
+                v = 1.0 - v;
+
+                vec4 c = texture2D(uSamplerTexture, vec2(u, v));
+
                 return diffuse(fp, ph, c) + spec(fp, npe, ph, c);
             }
 
@@ -247,6 +258,17 @@
                 vec3 ph = pe + th * npe;
                 vec3 fp = 2.0 * a02 * n0 * dot(n0, ph - pc) / (s0 * s0) + 2.0 * a12 * n1 * dot(n1, ph - pc) / (s1 * s1) + 2.0 * a22 * n2 * dot(n2, ph - pc) / (s2 * s2) + a21 * n2 / s2;
                 fp = normalize(fp);
+
+                float x = dot(n0, ph - pc);
+                float y = dot(n1, ph - pc);
+                float u = x - float(floor(x));
+                if (x < 0.0)
+                u = 1.0 - u;
+                float v = y - float(floor(y));
+                if (y < 0.0)
+                v = 1.0 - v;
+
+                vec4 c = texture2D(uSamplerTexture, vec2(u, v));
 
                 return diffuse(fp, ph, c) + spec(fp, npe, ph, c);
             } else {
@@ -334,11 +356,11 @@
                 th_min = th5;
             }
 
-//            if (th6 < th_min) {
-//                set_a(5,a02,  a12,  a22,  a21,  a00); //cylinder
-//                color = general_quadrics(5,a02,  a12,  a22,  a21,  a00,1.,1.,1., v2, vup, pc6, pe, npe);
-//                th_min=th6;
-//            }
+            if (th6 < th_min) {
+                set_a(5,a02,  a12,  a22,  a21,  a00); //cylinder
+                color = general_quadrics(5,a02,  a12,  a22,  a21,  a00,1.,1.,1., v2, vup, pc6, pe, npe);
+                th_min=th6;
+            }
 
             if (th_min == MAX_TH) {
                 color = vec4(0.5, 0.5, 0.5, 1.);
