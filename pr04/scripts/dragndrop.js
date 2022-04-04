@@ -10,7 +10,7 @@ UPLOADinit = function () {
 
     initParameters();
 
-    image.src = "images/dark.png"; //dark
+    image.src = "images/img.jpg"; //dark
     //load default images in thumb
 
     initDefaultThumbImgSize(image);

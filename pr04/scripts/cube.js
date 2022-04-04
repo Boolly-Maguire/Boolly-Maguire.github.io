@@ -22,14 +22,14 @@ function initParameters() {
     lightColor[0] = [1.0, 1.0, 1.0];
     lightNum = 1;
     //style section parameters
-    styleBright = 0;
-    styleDark = 1;
+    styleBright = 0.5;
+    styleDark = 1.0;
 
     coordZ = 1.0;
     coordY = 0.0;
     coordX = 0.0;
 
-    specSharpness = 1.0;
+    specSharpness = 0.5;
     specBlurriness = 0.0;
 
     checkAreaLight = 0;
@@ -94,7 +94,7 @@ window.onload = function init() {
     gl.useProgram(program);
 
     /* Vertex colors
-    // Load the data into the GPU
+    // Load the data into the GPU   
     var cBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, cBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, flatten(colors), gl.STATIC_DRAW );
