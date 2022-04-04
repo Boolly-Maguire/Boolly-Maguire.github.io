@@ -171,14 +171,17 @@
                 vec3 v_light = normalize(p_light - ph);
 
                 vec3 RVector = -v_light + 2.0 * dot(n, v_light) * n;
-                float temp = dot(RVector, -npe);
-                if (temp < 0.0)
-                    temp = 0.0;
+                float s = dot(RVector, -npe);
 
-                float sharpness = (1.0 - specSharpness) / (specSharpness - specBlurriness);
+                float smin = min(specBlurriness,specSharpness);
+                float smax = max(specBlurriness,specSharpness);
 
-                float specular = pow(temp, sharpness);
-                spec += color * specular;
+
+                s = (s - smin) / (smax - smin);
+
+                if (s>1.)               s=1.;
+                else if(s<0.)           s=0.;
+                spec += color * s;
                 return spec;
             }
         }
