@@ -6,12 +6,28 @@ $(document).ready(function () {
         $('.row-offcanvas').toggleClass('active')
     });
 
+    var X_slider = $("#X_slider");
+    var light_X = $("#light_X");
+    X_slider.attr("data-slider-min", -1).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", lightX).attr("data-slider-tooltip", "hide").slider({});
+    bindSliderValParam(X_slider, light_X, "lightX");
 
+    var Y_slider = $("#Y_slider");
+    var light_Y = $("#light_Y");
+    Y_slider.attr("data-slider-min", -1).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", lightY).attr("data-slider-tooltip", "hide").slider({});
+    bindSliderValParam(Y_slider, light_Y, "lightY");
 
     var Z_slider = $("#Z_slider");
-    var coord_Z = $("#coord_Z");
-    Z_slider.attr("data-slider-min", -1).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", coordZ).attr("data-slider-tooltip", "hide").slider({});
-    bindSliderValParam(Z_slider, coord_Z, "coordZ");
+    var light_Z = $("#light_Z");
+    Z_slider.attr("data-slider-min", -1).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", lightZ).attr("data-slider-tooltip", "hide").slider({});
+    bindSliderValParam(Z_slider, light_Z, "lightZ");
+
+
+
+
+    // var Z_slider = $("#Z_slider");
+    // var coord_Z = $("#coord_Z");
+    // Z_slider.attr("data-slider-min", -1).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", coordZ).attr("data-slider-tooltip", "hide").slider({});
+    // bindSliderValParam(Z_slider, coord_Z, "coordZ");
 
     // var Y_slider = $("#Y_slider");
     // var coord_Y = $("#coord_Y");
@@ -32,7 +48,7 @@ $(document).ready(function () {
         styleDark = slideEvt.value[1];
     });
 
-    $("#specSharpness_slider").slider({min: 0.0, max: 0.5, value: [specSharpness, specBlurriness], step: 0.001, focus: true});
+    $("#specSharpness_slider").slider({min: 0.0, max: 1.0, value: [specSharpness, specBlurriness], step: 0.001, focus: true});
     $("#specSharpness_slider").on("slide", function (slideEvt) {
         specBlurriness = slideEvt.value[0];
         specSharpness = slideEvt.value[1];
