@@ -4,6 +4,10 @@ var coordZ;
 var coordY;
 var coordX;
 
+var lightX;
+var lightY;
+var lightZ;
+
 var mouseFlag = 0;// 0 : moving ; 1: stop
 var currentLight = 0;
 var lightNum = 1;
@@ -29,7 +33,11 @@ function initParameters() {
     coordY = 0.0;
     coordX = 0.0;
 
-    specSharpness = 0.5;
+    lightX = 0.05;
+    lightY = 0.05;
+    lightZ = 1.0;
+
+    specSharpness = 1.0;
     specBlurriness = 0.0;
 
     checkAreaLight = 0;
@@ -49,6 +57,10 @@ var specSharpnessLoc, specBlurrinessLoc;
 var coordZLoc;
 var coordYLoc;
 var coordXLoc;
+
+var lightXLoc;
+var lightYLoc;
+var lightZLoc;
 
 var checkAreaLightLoc;
 
@@ -148,6 +160,10 @@ window.onload = function init() {
     coordYLoc = gl.getUniformLocation(program, "coordY");
     coordXLoc = gl.getUniformLocation(program, "coordX");
 
+    lightXLoc = gl.getUniformLocation(program,"lightX");
+    lightYLoc = gl.getUniformLocation(program,"lightY");
+    lightZLoc = gl.getUniformLocation(program,"lightZ");
+
     specSharpnessLoc = gl.getUniformLocation(program, "specSharpness");
     specBlurrinessLoc = gl.getUniformLocation(program, "specBlurriness");
 
@@ -191,6 +207,11 @@ function render() {
     gl.uniform1f(coordZLoc, coordZ);
     gl.uniform1f(coordYLoc, coordY);
     gl.uniform1f(coordXLoc, coordX);
+    //light positions
+    gl.uniform1f(lightXLoc, lightX);
+    gl.uniform1f(lightYLoc, lightY);
+    gl.uniform1f(lightZLoc, lightZ);
+
     gl.uniform1f(specSharpnessLoc, specSharpness);
     gl.uniform1f(specBlurrinessLoc, specBlurriness);
 
