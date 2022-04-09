@@ -246,7 +246,6 @@ function setMousePos(canvas, evt, i) {
     if (currentLight == i) {
         coordX = getMousePos(canvas, evt).x;
         coordY = getMousePos(canvas, evt).y;
-        console.log(i + ": " + coordX + " " + coordY);
     }
 
 }
