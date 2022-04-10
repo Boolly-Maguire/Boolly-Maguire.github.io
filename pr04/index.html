@@ -264,7 +264,7 @@
                     float v = y - float(floor(y));
                     if (y < 0.0)
                         v = 1.0 - v;
-                    c = texture2D(defaultTexture, vec2(u, v));
+                    c = texture2D(uSamplerTexture, vec2(u, v));
                 }
 
                 return diffuse(fp, ph, vec4(defaultLightColor * lightIntensity, 1.) + c)
