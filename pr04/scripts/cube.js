@@ -22,6 +22,9 @@ var specSharpness, specBlurriness;
 
 var checkAreaLight;
 
+var lightIntensity;
+
+
 function initParameters() {
     lightColor[0] = [1.0, 1.0, 1.0];
     lightNum = 1;
@@ -33,14 +36,16 @@ function initParameters() {
     coordY = 0.0;
     coordX = 0.0;
 
-    lightX = 0.05;
-    lightY = 0.05;
+    lightX = 1.0;
+    lightY = 1.0;
     lightZ = 1.0;
 
     specSharpness = 1.0;
-    specBlurriness = 0.0;
+    specBlurriness = 0.6;
 
     checkAreaLight = 0;
+
+    lightIntensity = 0.5;
 }
 
 
@@ -64,6 +69,8 @@ var lightZLoc;
 
 var checkAreaLightLoc;
 
+var lightIntensityLoc;
+
 /****************** For Basic shader ******************/
 
 var gl;
@@ -75,6 +82,9 @@ var texCoords = [];
 var numVertices = 36;
 
 var darkTexture, darkImage;
+
+var defaultTexture, defaultImage;
+
 
 window.onload = function init() {
     var canvas = document.getElementById("gl-canvas");
@@ -148,13 +158,25 @@ window.onload = function init() {
     requestCORSIfNotSameOrigin(darkImage, darkImage.src);
     console.log(this.darkImage.src);
 
+    defaultImage.src = image1.src;
+    requestCORSIfNotSameOrigin(defaultImage, defaultImage.src);
+    console.log(this.defaultImage.src);
+
     darkImage.onload = function () {
         handleTextureLoaded(darkImage, darkTexture);
     }
 
-    gl.activeTexture(gl.TEXTURE2);
+    defaultImage.onload = function () {
+        handleTextureLoaded(defaultImage, defaultTexture);
+    }
+
+    gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, darkTexture);
-    gl.uniform1i(gl.getUniformLocation(program, "uSamplerTexture"), 2);
+    gl.uniform1i(gl.getUniformLocation(program, "uSamplerTexture"), 0);
+
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, defaultTexture);
+    gl.uniform1i(gl.getUniformLocation(program, "defaultTexture"), 1);
 
     coordZLoc = gl.getUniformLocation(program, "coordZ");
     coordYLoc = gl.getUniformLocation(program, "coordY");
@@ -171,6 +193,7 @@ window.onload = function init() {
     lightNumLoc = gl.getUniformLocation(program, "lightNum");
 
     lightColorLoc = gl.getUniformLocation(program, "lightColor");
+    lightIntensityLoc = gl.getUniformLocation(program, "lightIntensity")
 
     styleBrightLoc = gl.getUniformLocation(program, "styleBright");
     styleDarkLoc = gl.getUniformLocation(program, "styleDark");
@@ -182,7 +205,9 @@ window.onload = function init() {
 
 function initTextures() {
     darkTexture = gl.createTexture();
+    defaultTexture = gl.createTexture();
     darkImage = new Image();
+    defaultImage = new Image();
 }
 
 function handleTextureLoaded(image, texture) {
@@ -215,11 +240,11 @@ function render() {
     gl.uniform1f(specSharpnessLoc, specSharpness);
     gl.uniform1f(specBlurrinessLoc, specBlurriness);
 
-
     gl.uniform1i(currentLightLoc, currentLight);
     gl.uniform1f(lightNumLoc, lightNum);
 
     gl.uniform3fv(lightColorLoc, flatten(lightColor));
+    gl.uniform1f(lightIntensityLoc, lightIntensity)
 
     gl.uniform1f(styleBrightLoc, styleBright);
     gl.uniform1f(styleDarkLoc, styleDark);

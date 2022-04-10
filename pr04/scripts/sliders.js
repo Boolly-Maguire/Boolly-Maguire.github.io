@@ -22,22 +22,10 @@ $(document).ready(function () {
     bindSliderValParam(Z_slider, light_Z, "lightZ");
 
 
-
-
-    // var Z_slider = $("#Z_slider");
-    // var coord_Z = $("#coord_Z");
-    // Z_slider.attr("data-slider-min", -1).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", coordZ).attr("data-slider-tooltip", "hide").slider({});
-    // bindSliderValParam(Z_slider, coord_Z, "coordZ");
-
-    // var Y_slider = $("#Y_slider");
-    // var coord_Y = $("#coord_Y");
-    // Y_slider.attr("data-slider-min", -1).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", coordY).attr("data-slider-tooltip", "hide").slider({});
-    // bindSliderValParam(Y_slider, coord_Y, "coordY");
-    //
-    // var X_slider = $("#X_slider");
-    // var coord_X = $("#coord_X");
-    // X_slider.attr("data-slider-min", -1).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", coordX).attr("data-slider-tooltip", "hide").slider({});
-    // bindSliderValParam(X_slider, coord_X, "coordX");
+    var lightIntensity_silder = $("#lightIntensity_silder");
+    var light_Intensity = $("#lightIntensity");
+    lightIntensity_silder.attr("data-slider-min", 0).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", lightIntensity).attr("data-slider-tooltip", "hide").slider({});
+    bindSliderValParam(lightIntensity_silder, light_Intensity, "lightIntensity");
 
     /**********************SliderBar********************************/
 
@@ -90,7 +78,6 @@ function setupLightFunctions(i) {
                 for (var i = 0; i < lightNum; i++) {
                     if (currentLight == i) {
                         lightColor[i] = [rgbObject.r / 255, rgbObject.g / 255, rgbObject.b / 255];
-                        setLightMarkFill(i); //function in addLights.lib
                     }
                 }
                 //add event: add border if it is white#ffffff;

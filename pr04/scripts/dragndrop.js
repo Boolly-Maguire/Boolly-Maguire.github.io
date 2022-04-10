@@ -1,23 +1,28 @@
-var image;
+var image, image1;
 // init vars
 var $container = $('#container'),
+    $container1 = $('#container1');
 
 
 UPLOADinit = function () {
     /******************* Initial Maps *********************/
 
     image = new Image();
+    image1 = new Image();
 
     initParameters();
 
     image.src = "images/img.jpg"; //dark
+    image1.src = "images/trees.jpg"
     //load default images in thumb
 
     initDefaultThumbImgSize(image);
+    initDefaultThumbImgSize(image1);
 
     //canvas size based on Normal map
 
     $("#containerImage").append(image);
+    $("#containerImage1").append(image1);
 
     //$("#container7image").append(image3);
     //updateCanvasSizeandStyle(image3)
@@ -49,6 +54,13 @@ function addEventListeners() {
     container.addEventListener('dragenter', cancel, false);
     container.addEventListener('dragexit', cancel, false);
     container.addEventListener('drop', dropFile, false);
+
+
+    var container1 = $container1[0];
+    container1.addEventListener('dragover', cancel, false);
+    container1.addEventListener('dragenter', cancel, false);
+    container1.addEventListener('dragexit', cancel, false);
+    container1.addEventListener('drop', dropFile, false);
 
 }
 
@@ -135,6 +147,16 @@ function fileUploaded(event, elemName) {
 
         // Update WebGL texture.
         darkImage.src = containerImage.src;
+    } else if (elemName === "container1") {
+        let containerImage1 = new Image();
+        containerImage1.src = event.target.result;
+        image1 = containerImage1;
+
+        //set thumb image size
+        setThumbImgSize(containerImage1);
+
+        // Update WebGL texture.
+        defaultImage.src = containerImage1.src;
     }
 
     // create the image object
