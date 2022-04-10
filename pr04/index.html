@@ -264,7 +264,7 @@
                     float v = y - float(floor(y));
                     if (y < 0.0)
                         v = 1.0 - v;
-                    c = texture2D(uSamplerTexture, vec2(u, v));
+                    c = texture2D(defaultTexture, vec2(u, v));
                 }
 
                 return diffuse(fp, ph, vec4(defaultLightColor * lightIntensity, 1.) + c)
@@ -385,25 +385,25 @@
                     <div id="basicImages" class="inCollapse collapse in">
 
                         <div class="imgbox_container">
-                            <h6><span title="Insert or DragnDrop dark image here">Solid Texture Image</span></h6>
-                            <div>
-                                <div id="container" class="imgThumb_container">
-                                    <div class="btn-file">
-                                        <input type="file" id="inputFileToLoad">
-                                    </div>
-                                    <div id="containerImage" class="imgThumb"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="imgbox_container">
-                            <h6><span title="Insert or DragnDrop dark image here">Texture Mapping Image</span></h6>
+                            <h6><span title="Insert or DragnDrop texture image here">Solid Texture Image</span></h6>
                             <div>
                                 <div id="container1" class="imgThumb_container">
                                     <div class="btn-file">
                                         <input type="file" id="inputFileToLoad1">
                                     </div>
-                                    <div id="containerImage1" class="imgThumb"></div>
+                                    <div id="container1image" class="imgThumb"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="imgbox_container">
+                            <h6><span title="Insert or DragnDrop texture image here">Texture Mapping Image</span></h6>
+                            <div>
+                                <div id="container2" class="imgThumb_container">
+                                    <div class="btn-file">
+                                        <input type="file" id="inputFileToLoad2">
+                                    </div>
+                                    <div id="container2image" class="imgThumb"></div>
                                 </div>
                             </div>
                         </div>

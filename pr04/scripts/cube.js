@@ -154,13 +154,11 @@ window.onload = function init() {
 
     initTextures();
 
-    darkImage.src = image.src;
+    darkImage.src = image1.src;
     requestCORSIfNotSameOrigin(darkImage, darkImage.src);
-    console.log(this.darkImage.src);
 
-    defaultImage.src = image1.src;
+    defaultImage.src = image2.src;
     requestCORSIfNotSameOrigin(defaultImage, defaultImage.src);
-    console.log(this.defaultImage.src);
 
     darkImage.onload = function () {
         handleTextureLoaded(darkImage, darkTexture);

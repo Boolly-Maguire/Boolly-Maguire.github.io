@@ -1,32 +1,32 @@
-var image, image1;
+var image1, image2;
 // init vars
-var $container = $('#container'),
-    $container1 = $('#container1');
+var $container1 = $('#container1'),
+    $container2 = $('#container2');
 
 
 UPLOADinit = function () {
     /******************* Initial Maps *********************/
 
-    image = new Image();
     image1 = new Image();
+    image2 = new Image();
 
     initParameters();
 
-    image.src = "images/img.jpg"; //dark
-    image1.src = "images/trees.jpg"
+    image1.src = "images/img.jpg"; //dark
+    image2.src = "images/trees.jpg"
     //load default images in thumb
 
-    initDefaultThumbImgSize(image);
     initDefaultThumbImgSize(image1);
+    initDefaultThumbImgSize(image2);
 
     //canvas size based on Normal map
 
-    $("#containerImage").append(image);
-    $("#containerImage1").append(image1);
+    $("#container1image").append(image1);
+    $("#container2image").append(image2);
 
     //$("#container7image").append(image3);
     //updateCanvasSizeandStyle(image3)
-    initDefaultCanvasSize(image);
+    initDefaultCanvasSize(image1);
     //key function
     addEventListeners();
 }
@@ -49,18 +49,18 @@ function initDefaultCanvasSize(_image) {
 
 function addEventListeners() {
     // container1 DnD event
-    var container = $container[0];
-    container.addEventListener('dragover', cancel, false);
-    container.addEventListener('dragenter', cancel, false);
-    container.addEventListener('dragexit', cancel, false);
-    container.addEventListener('drop', dropFile, false);
-
-
     var container1 = $container1[0];
     container1.addEventListener('dragover', cancel, false);
     container1.addEventListener('dragenter', cancel, false);
     container1.addEventListener('dragexit', cancel, false);
     container1.addEventListener('drop', dropFile, false);
+
+
+    var container2 = $container2[0];
+    container2.addEventListener('dragover', cancel, false);
+    container2.addEventListener('dragenter', cancel, false);
+    container2.addEventListener('dragexit', cancel, false);
+    container2.addEventListener('drop', dropFile, false);
 
 }
 
@@ -132,31 +132,30 @@ function handleSelectedFile(fileSelected, container) {
 function fileUploaded(event, elemName) {
     var image;
     var container = $('#' + elemName);
-
     // check it's an image
 
     container.addClass('live');
 
-    if (elemName === "container") {
-        let containerImage = new Image();
-        containerImage.src = event.target.result;
-        image = containerImage;
+    if (elemName === "container1") {
+        image1 = new Image();
+        image1.src = event.target.result;
 
+        image = image1;
         //set thumb image size
-        setThumbImgSize(containerImage);
+        setThumbImgSize(image1);
 
         // Update WebGL texture.
-        darkImage.src = containerImage.src;
-    } else if (elemName === "container1") {
-        let containerImage1 = new Image();
-        containerImage1.src = event.target.result;
-        image1 = containerImage1;
+        darkImage.src = image1.src;
+    } else if (elemName === "container2") {
+        image2 = new Image();
+        image2.src = event.target.result;
+        image = image2;
 
         //set thumb image size
-        setThumbImgSize(containerImage1);
+        setThumbImgSize(image2);
 
         // Update WebGL texture.
-        defaultImage.src = containerImage1.src;
+        defaultImage.src = image2.src;
     }
 
     // create the image object
