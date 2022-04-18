@@ -391,8 +391,8 @@
 
                 for (int m = 0; m < A; m++) {
                     for (int n = 0; n < A; n++) {
-                        float m_float = (float(m)+random(p).x)/float(A*A);
-                        float n_float = (float(n)+random(p).y)/float(A*A);
+                        float m_float = (float(m)+random(p).x);
+                        float n_float = (float(n)+random(p).y);
                         vec3 p_s = p_light;
                          p_s.x +=  m_float;
                          p_s.y +=  n_float;
@@ -421,11 +421,7 @@
                 float A2 = float(A*A);
 
                 if (S > 0.) {
-                    float S1,S2;
-                    if (S==A2)
-                        S = 0.50;
-                    else
-                        S = constrain( S,  A2*0.0, A2,  0.8,  0.50);
+                    S = constrain( S,  0.0, A2,  1.0,  0.30);
 
                     shadow_intensity = S;
                     return true;
