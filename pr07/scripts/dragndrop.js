@@ -12,8 +12,8 @@ UPLOADinit = function () {
 
     initParameters();
 
-    image1.src = "images/lightning.jpg"; //dark
-    image2.src = "images/moon.jpg"
+    image1.src = "images/stars.jpg"; //dark
+    image2.src = "images/base.jpg"
     //load default images in thumb
 
     initDefaultThumbImgSize(image1);
