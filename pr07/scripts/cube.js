@@ -8,6 +8,10 @@ var lightX;
 var lightY;
 var lightZ;
 
+var Dir_lightX;
+var Dir_lightY;
+var Dir_lightZ;
+
 var mouseFlag = 0;// 0 : moving ; 1: stop
 var currentLight = 0;
 var lightNum = 1;
@@ -21,6 +25,7 @@ var styleBright,
 var specSharpness, specBlurriness;
 
 var checkAreaLight;
+var checkDirectionalLight;
 
 var lightIntensity;
 
@@ -40,10 +45,15 @@ function initParameters() {
     lightY = 1.0;
     lightZ = 1.0;
 
+    Dir_lightX = 0.4;
+    Dir_lightY = -1.0;
+    Dir_lightZ = -1.0;
+
     specSharpness = 1.0;
     specBlurriness = 0.9;
 
     checkAreaLight = 0;
+    checkDirectionalLight = 0;
 
     lightIntensity = 0.15;
 }
@@ -66,6 +76,11 @@ var coordXLoc;
 var lightXLoc;
 var lightYLoc;
 var lightZLoc;
+
+var Dir_lightXLoc;
+var Dir_lightYLoc;
+var Dir_lightZLoc;
+
 
 var checkAreaLightLoc;
 
@@ -158,6 +173,10 @@ window.onload = function init() {
     lightYLoc = gl.getUniformLocation(program,"lightY");
     lightZLoc = gl.getUniformLocation(program,"lightZ");
 
+    Dir_lightXLoc = gl.getUniformLocation(program,"Dir_lightX");
+    Dir_lightYLoc = gl.getUniformLocation(program,"Dir_lightY");
+    Dir_lightZLoc = gl.getUniformLocation(program,"Dir_lightZ");
+
     specSharpnessLoc = gl.getUniformLocation(program, "specSharpness");
     specBlurrinessLoc = gl.getUniformLocation(program, "specBlurriness");
 
@@ -171,6 +190,7 @@ window.onload = function init() {
     styleDarkLoc = gl.getUniformLocation(program, "styleDark");
 
     checkAreaLightLoc = gl.getUniformLocation(program, "checkAreaLight");
+    checkDirectionalLightLoc = gl.getUniformLocation(program, "checkDirectionalLight");
 
     render();
 };
@@ -201,6 +221,9 @@ function render() {
     var checkAreaLightElem = $('#checkAreaLightSelect:checked');
     checkAreaLight = (checkAreaLightElem.val()) ? 1 : 0;
 
+    var checkDirectionalLightElem = $('#checkDirectionalLightSelect:checked');
+    checkDirectionalLight = (checkDirectionalLightElem.val()) ? 1 : 0;
+
     gl.uniform1f(coordZLoc, coordZ);
     gl.uniform1f(coordYLoc, coordY);
     gl.uniform1f(coordXLoc, coordX);
@@ -208,6 +231,10 @@ function render() {
     gl.uniform1f(lightXLoc, lightX);
     gl.uniform1f(lightYLoc, lightY);
     gl.uniform1f(lightZLoc, lightZ);
+
+    gl.uniform1f(Dir_lightXLoc, Dir_lightX);
+    gl.uniform1f(Dir_lightYLoc, Dir_lightY);
+    gl.uniform1f(Dir_lightZLoc, Dir_lightZ);
 
     gl.uniform1f(specSharpnessLoc, specSharpness);
     gl.uniform1f(specBlurrinessLoc, specBlurriness);
@@ -222,6 +249,9 @@ function render() {
     gl.uniform1f(styleDarkLoc, styleDark);
 
     gl.uniform1i(checkAreaLightLoc, checkAreaLight);
+    gl.uniform1i(checkDirectionalLightLoc, checkDirectionalLight);
+
+
 
     gl.drawArrays(gl.TRIANGLES, 0, numVertices);
 
@@ -251,12 +281,12 @@ function quad(a, b, c, d) {
 }
 
 function colorCube() {
-    quad(1, 0, 3, 2);
-    quad(2, 3, 7, 6);
-    quad(3, 0, 4, 7);
-    quad(6, 5, 1, 2);
-    quad(4, 5, 6, 7);
-    quad(5, 4, 0, 1);
+    //quad(1, 0, 3, 2);
+    // quad(2, 3, 7, 6);
+    // quad(3, 0, 4, 7);
+    // quad(6, 5, 1, 2);
+     quad(4, 5, 6, 7);
+    // quad(5, 4, 0, 1);
 }
 
 function requestCORSIfNotSameOrigin(img, url) {
