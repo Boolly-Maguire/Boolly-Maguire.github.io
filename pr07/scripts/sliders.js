@@ -27,6 +27,21 @@ $(document).ready(function () {
     lightIntensity_silder.attr("data-slider-min", 0).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", lightIntensity).attr("data-slider-tooltip", "hide").slider({});
     bindSliderValParam(lightIntensity_silder, light_Intensity, "lightIntensity");
 
+    var Dir_X_slider = $("#Dir_X_slider");
+    var Dir_light_X = $("#Dir_light_X");
+    Dir_X_slider.attr("data-slider-min", -1).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", Dir_lightX).attr("data-slider-tooltip", "hide").slider({});
+    bindSliderValParam(Dir_X_slider, Dir_light_X, "Dir_lightX");
+
+    var Dir_Y_slider = $("#Dir_Y_slider");
+    var Dir_light_Y = $("#Dir_light_Y");
+    Dir_Y_slider.attr("data-slider-min", -1).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", Dir_lightY).attr("data-slider-tooltip", "hide").slider({});
+    bindSliderValParam(Dir_Y_slider, Dir_light_Y, "Dir_lightY");
+
+    var Dir_Z_slider = $("#Dir_Z_slider");
+    var Dir_light_Z = $("#Dir_light_Z");
+    Dir_Z_slider.attr("data-slider-min", -1).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", Dir_lightZ).attr("data-slider-tooltip", "hide").slider({});
+    bindSliderValParam(Dir_Z_slider, Dir_light_Z, "Dir_lightZ");
+
     /**********************SliderBar********************************/
 
     /**Basic Image**/
@@ -45,6 +60,9 @@ $(document).ready(function () {
     /*********************CheckBox**********************************/
     var checkAreaLightElem = $('#checkAreaLightSelect');
     initCheckbox(checkAreaLight, checkAreaLightElem);
+
+    var checkDirectionalLightElem = $('#checkDirectionalLightSelect');
+    initCheckbox(checkDirectionalLight, checkDirectionalLightElem);
 
 });//end of $(document).ready
 
