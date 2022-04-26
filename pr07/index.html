@@ -80,26 +80,35 @@
         uniform float lightIntensity;
 
         float a02, a12, a22, a21, a00, s0, s1, s2;
+        bool insides[10];
+        float etas[10];
         vec3 pc[10];
         vec3 v2, vup;
         float shadow_intensity;
 
-        float ray[10];
-
         const int N = 5;
         const int M = 7;
 
+        vec4 defaultColor = vec4(0.5, 0.5, 0.5, 1.0);
+
         float constrain(float ip, float ip_start, float ip_end, float op_start, float op_end) {
             float slope = (op_end - op_start) / (ip_end - ip_start);
-            return op_start + slope*(ip - ip_start);
+            return op_start + slope * (ip - ip_start);
        }
 
-       bool isOpaque(int type){
-            if (type == 0 || type == 1)
-                return false;
-            else
+       bool isTransparent(int type){
+            if (type == 1)
                 return true;
+            else
+                return false;
        }
+
+        bool isReflective(int type){
+            if (type == 0)
+                return true;
+            else
+                return false;
+        }
 
         vec3 random(vec3 p) {
             p = vec3(dot(p, vec3(127.1, 311.7, 74.7)),
@@ -143,7 +152,7 @@
 
         vec4 general_quadrics(int type,
             vec3 v2, vec3 vup, vec3 pc,
-            vec3 pe, vec3 npe, out float th, out vec3 fp) {
+            vec3 pe, vec3 npe, bool inside, out float th, out vec3 fp) {
 
             th = MAX_TH;
 
@@ -164,11 +173,11 @@
 
             float delta = B * B - 4.0 * A * C;
 
-            if ((type != 5 && delta >= 0.0 && -B - sqrt(delta) >= 0.0) || (type == 5 && delta >= 0.0 && -B + sqrt(delta) >= 0.0)) {
+            if ((!inside && delta >= 0.0 && -B - sqrt(delta) >= 0.0) || (inside && delta >= 0.0 && -B + sqrt(delta) >= 0.0)) {
 
                 if (a21 > 0.0)
                     th = -C / B;
-                else if (type == 5)
+                else if (inside == true)
                     th = (-B + sqrt(delta)) / (2.0 * A);
                 else
                     th = (-B - sqrt(delta)) / (2.0 * A);
@@ -184,10 +193,8 @@
                     float z = dot(n2, ph - pc) / s2;
                     float v = acos(z) / PI;
                     float u = acos(y / sin(PI * v)) / (2.0 * PI);
-                    c = texture2D(uSamplerTexture, vec2(u, v)); }
-//                } else if (type == 2 || type == 3 || type == 4)
-//                    c = vec4(0.5, 0.7, 0.8, 1);  //vec4(1,0.8,0.8,1); }
-                else {
+                    c = texture2D(uSamplerTexture, vec2(u, v));
+                } else {
                     float x = dot(n0, ph - pc);
                     float y = dot(n1, ph - pc);
                     float u = x - float(floor(x));
@@ -231,7 +238,7 @@
                 }
 
             } else {
-                return vec4(0.5, 0.5, 0.5, 1.);
+                return defaultColor;
             }
         }
 
@@ -239,9 +246,9 @@
             if (type == 0)//ellipsoid
             {
                 a02 = 1., a12 = 1., a22 = 1., a21 = 0., a00 = -1.;
-                s0 = 0.06;
-                s1 = 0.12;
-                s2 = 0.06;
+                s0 = 0.35;
+                s1 = 0.35;
+                s2 = 0.35;
                 v2 = vec3(0., 0., -1.);
                 vup = vec3(0., 1., 0.);
             }
@@ -251,6 +258,8 @@
                 s0 = 0.35;
                 s1 = 0.35;
                 s2 = 0.35;
+                v2 = vec3(0., 0., -1.);
+                vup = vec3(0., 1., 0.);
             }
             else if (type == 2)//hyperboloid of one sheet
             {
@@ -258,6 +267,8 @@
                 s0 = 0.01;
                 s1 = 0.03;
                 s2 = 0.01;
+                v2 = vec3(0., 0., -1.);
+                vup = vec3(0., 1., 0.);
             }
             else if (type == 3)//hyperboloid of 2 sheets
             {
@@ -265,6 +276,8 @@
                 s0 = 0.01;
                 s1 = 0.03;
                 s2 = 0.01;
+                v2 = vec3(0., 0., -1.);
+                vup = vec3(0., 1., 0.);
             }
             else if (type == 4)//cylinder
             {
@@ -272,6 +285,8 @@
                 s0 = 0.03;
                 s1 = 0.03;
                 s2 = 0.03;
+                v2 = vec3(0., 0., -1.);
+                vup = vec3(0., 1., 0.);
             }
             else if (type == 5)//infinite sphere
             {
@@ -279,6 +294,9 @@
                 s0 = 5.0;
                 s1 = 5.0;
                 s2 = 5.0;
+                v2 = vec3(0., 0., -1.);
+                vup = vec3(0., 1., 0.);
+
             }
             else if (type == 6)//plane
             {
@@ -300,21 +318,23 @@
                 for (int i = 0; i < 5; i++) {
                     set_a(i);   //we set the parameters
                     //we try to find an intersection of the ray
+                    if (isTransparent(i))
+                        continue;
                     vec3 pe_s = p;                      //eye position/origin of that ray becomes the pixel itself
                     vec3 p_s = p_light;                //end point of the ray will be the light position
                     vec3 npe_s; // = normalize(p_s - pe_s);   //ray direction npe_s;
 
                     if (checkDirectionalLight)
-                        npe_s =  normalize(-dir_light);
+                    npe_s =  normalize(-dir_light);
                     else
-                        npe_s = normalize(p_s - pe_s);
+                    npe_s = normalize(p_s - pe_s);
                     vec3 v2_s = vec3(0, 0, -1);            //viewing direction will be reversed in this case
                     vec3 vup_s = -1. * vup;                    //vup stays the same
 
-                    vec4 clr = general_quadrics(i, v2_s, vup_s, pc[i], pe_s, npe_s, th_tmp, fp_tmp);
+                    vec4 clr = general_quadrics(i, v2_s, vup_s, pc[i], pe_s, npe_s, insides[i], th_tmp, fp_tmp);
 
                     if (th_tmp != MAX_TH && th_tmp > 0. && obj_intersected != 5 && i != obj_intersected)  //for object to cast shadow, it has to lie between t=0 and t=1 and it cant cast shadow on its own
-                        count += 1.;
+                    count += 1.;
                 }
 
                 if (count != 0.) {
@@ -336,20 +356,22 @@
                         float m_float = (float(m) + random(p).x);
                         float n_float = (float(n) + random(p).y);
                         vec3 p_s = p_light;
-                         p_s.x +=  m_float;
-                         p_s.y +=  n_float;
+                        p_s.x +=  m_float;
+                        p_s.y +=  n_float;
 
                         //check with each object
                         float th_min_s = MAX_TH, th_s[10];
                         for (int i = 0; i < 5; i++) {
                             set_a(i);   //we set the parameters
                             //we try to find an intersection of the ray
+                            if (isTransparent(i))
+                                continue;
                             vec3 pe_s = p;                      //eye position/origin of that ray becomes the pixel itself
                             vec3 npe_s = normalize(p_s - pe_s);   //ray direction npe_s;
                             vec3 v2_s = vec3(0, 0, -1);            //viewing direction will be reversed in this case
                             vec3 vup_s = -1. * vup;                    //vup stays the same
 
-                            vec4 clr = general_quadrics(i, v2_s, vup_s, pc[i], pe_s, npe_s, th_s[i], fp_tmp);
+                            vec4 clr = general_quadrics(i, v2_s, vup_s, pc[i], pe_s, npe_s, insides[i], th_s[i], fp_tmp);
 
                             if (th_s[i] < th_min_s && th_min_s > 0. && obj_intersected != 5 && i != obj_intersected)  //for object to cast shadow, it has to lie between t=0 and t=1 and it cant cast shadow on its own
                             { th_min_s = th_s[i]; }
@@ -371,6 +393,8 @@
             }
         }
 
+
+
         void main() {
             vec3 p = vec3(v_position[0], v_position[1], v_position[2]);
             vec3 pe = p_eye;
@@ -378,88 +402,222 @@
             // quadrics parameters --------------------------------------------------------------
             vec3 npe = normalize(p - pe);
 
-            pc[0] = vec3(0.30, 0.40, -0.5);         //ellipsoid
-            pc[1] = vec3(0.35, -0.1, -1.2);           //sphere
+            pc[0] = vec3(0.35, -0.1, -1.2);         //ellipsoid
+            pc[1] = vec3(-0.5, 0.0, -0.5);           //sphere
             pc[2] = vec3(-0.10, 0.0, -0.95);          //hyperboloid of 1 sheet
             pc[3] = vec3(-0.80, 0.0, -1.2);         //hyperboloid of 2 sheets
             pc[4] = vec3(0.5, 0.0, -0.2);           //cylinder
             pc[5] = vec3(0.0, 0.0, 0.0);            //infinite sphere
             pc[6] = vec3(0.0, -0.8, 0.0);           //plane
 
+            insides[0] = false;
+            insides[1] = false;
+            insides[2] = false;
+            insides[3] = false;
+            insides[4] = false;
+            insides[5] = true;
+            insides[6] = false;
 
-            ray[0] = 0.8;
-            ray[1] = 0.5;
-            ray[2] = 0.1;
-            ray[3] = 0.1;
+            etas[0] = 1.5;
+            etas[1] = 1.0;
+            etas[2] = 1.5;
+            etas[3] = 1.0;
+            etas[4] = 1.0;
+            etas[5] = 1.0;
+            etas[6] = 1.0;
 
-            vec3 p_tmp = p;
-            vec3 pe_tmp = pe;
-            vec3 pc_tmp;
-
-            int obj_intersected =-1;
+            int obj_intersected = -1;
             float th_min = MAX_TH;
+            vec3 fp_min;
+            vec3 pc_min;
+            float eta_min;
             vec4 color_min = vec4(0., 0., 0., 0.);
 
-            for(int rayDepth = 0; rayDepth < 4; rayDepth++) {
-                //we first have to construct the ray
-                vec3 npe_tmp = normalize(p_tmp - pe_tmp);
-                float th_tmp = MAX_TH;
-                vec3 fp_tmp;
-                int obj_tmp = -1;
-
-                vec4 color_tmp = vec4(0., 0., 0., 1.);
-
-                //now lets check intersection point for this ray
-                for(int i = 0; i < 7; i++) {
-                    set_a(i);
-                    float t;
-                    vec3 fp;
-                    vec4 clr = general_quadrics(i, v2, vup, pc[i], pe_tmp, npe_tmp, t, fp);
-                    if (t < th_tmp && i != obj_intersected) {
-
-                        th_tmp  = t; //i.e we found an intersection
-                        fp_tmp = fp;
-                        obj_tmp = i; //storing the object
-                        pc_tmp = pc[i];
-                        color_tmp = clr;   //local color in case this is final
-                        if (rayDepth == 0)   //need to store these in case first intersected object is opaque
-                            { th_min = t; obj_intersected = i;}
-                    }
+            // first rendering opaque
+            for(int i = 0; i < 7; i++) {
+                set_a(i);
+                float t;
+                vec3 fp;
+                vec4 clr = general_quadrics(i, v2, vup, pc[i], pe, npe, insides[i], t, fp);
+                if (t < th_min) {
+                    th_min = t;
+                    fp_min = fp;
+                    pc_min = pc[i];
+                    eta_min = etas[i];
+                    color_min = clr;
+                    obj_intersected = i;
                 }
-                color_min = color_min + color_tmp * ray[rayDepth];
-
-                //now we check on whether we want to recurse or not
-                if (th_tmp == MAX_TH) //i.e. we didnt find any intersection, we will stop anyway
-                    break;
-                else {
-                    if (isOpaque(obj_tmp) == true)        //we hit an object that is opaque, we will stop recursion
-                        {  th_min = th_tmp; obj_intersected = obj_tmp; break; }
-                    else {
-                            //we hit a reflective object; need to continue and compute things
-                            vec3 ph_tmp = pe_tmp + npe_tmp * th_tmp;
-                            vec3 I = npe_tmp;
-                            vec3 N = fp_tmp;
-                            float cosT = dot(I, N);
-                            vec3 R = normalize(I - 2. * cosT * N);
-                            //change points now, for next iteration
-                            pe_tmp = ph_tmp;
-                            p_tmp = pe_tmp + R;
-                        }
-                  }
-           }
-
-            vec4 color;
-            if (th_min == MAX_TH)
-                color = vec4(0.5, 0.5, 0.5, 1.);
-            else{
-                vec3 point =  pe + npe * th_min;
-                if (isOpaque(obj_intersected) == true && in_shadow(point, obj_intersected) == true && obj_intersected != 5 )
-                    color = vec4(color_min.rgb * shadow_intensity, 1);
-                else
-                    color = vec4(color_min.rgb, 1);
             }
 
-            gl_FragColor = color;
+            if (th_min == MAX_TH) {
+                gl_FragColor = defaultColor;
+                return;
+            } else {
+                if (isReflective(obj_intersected) || isTransparent(obj_intersected)) {
+                    // enter one transparent object
+                    bool enter = false;
+
+                    for (int rayDepth = 0; rayDepth < 3; rayDepth++) {
+                        float cosT = dot(npe, fp_min);
+                        pe = pe + th_min * npe;
+
+
+                        if (isReflective(obj_intersected)) {
+                            npe = normalize(npe - 2. * cosT * fp_min);
+                            th_min = MAX_TH;
+                            for(int i = 0; i < 7; i++) {
+                                set_a(i);
+                                float t;
+                                vec3 fp;
+                                vec4 clr = general_quadrics(i, v2, vup, pc[i], pe, npe, insides[i], t, fp);
+                                if (t < th_min) {
+                                    th_min = t;
+                                    fp_min = fp;
+                                    eta_min = etas[i];
+                                    pc_min = pc[i];
+                                    color_min = clr;
+                                    obj_intersected = i;
+                                }
+                            }
+                            if (th_min == MAX_TH) {
+                                gl_FragColor = color_min;
+                                return;
+                            }
+
+                        } else if(isTransparent(obj_intersected)) {
+                            float delta = (cosT * cosT - 1.0) / (eta_min * eta_min) + 1.0;
+                            // refraction
+                            if (delta >= 0.00001) {
+                                npe = normalize(npe / eta_min + (cosT / eta_min + sqrt(delta)) * fp_min);
+                                if (enter == false) {
+                                    enter = true;
+                                } else {
+                                    enter = false;
+                                }
+                                if (enter) {
+                                    eta_min = 1.0 / eta_min;
+
+                                    float t;
+                                    vec3 fp;
+                                    set_a(obj_intersected);
+                                    vec4 clr = general_quadrics(obj_intersected, v2, vup, pc_min, pe, npe, true, t, fp);
+                                    th_min = t;
+                                    fp_min = fp;
+                                } else {
+                                    th_min = MAX_TH;
+                                    for(int i = 0; i < 7; i++) {
+                                        set_a(i);
+                                        float t;
+                                        vec3 fp;
+                                        vec4 clr = general_quadrics(i, v2, vup, pc[i], pe, npe, insides[i], t, fp);
+                                        if (t < th_min) {
+                                            th_min = t;
+                                            fp_min = fp;
+                                            eta_min = etas[i];
+                                            pc_min = pc[i];
+                                            color_min = clr;
+                                            obj_intersected = i;
+                                        }
+                                    }
+                                    if (th_min == MAX_TH) {
+                                        gl_FragColor = color_min;
+                                        return;
+                                    }
+                                }
+                                // special case: nothing happen
+                            } else if (delta < 0.00001 && delta > -0.00001) {
+                                enter = false;
+                                th_min = MAX_TH;
+                                int intersected = obj_intersected;
+                                for(int i = 0; i < 7; i++) {
+
+                                    set_a(i);
+                                    if (i == intersected)
+                                        continue;
+                                    float t;
+                                    vec3 fp;
+                                    vec4 clr = general_quadrics(i, v2, vup, pc[i], pe, npe, insides[i], t, fp);
+                                    // assume we don't get transparent object anymore
+                                    if (t < th_min) {
+                                        th_min = t;
+                                        fp_min = fp;
+                                        eta_min = etas[i];
+                                        pc_min = pc[i];
+                                        color_min = clr;
+                                        obj_intersected = i;
+                                    }
+                                }
+                                // total reflection inside
+                            } else {
+                                npe = normalize(npe - 2. * cosT * fp_min);
+
+                                if (enter) {
+                                    float t;
+                                    vec3 fp;
+                                    set_a(obj_intersected);
+                                    vec4 clr = general_quadrics(obj_intersected, v2, vup, pc_min, pe, npe, true, t, fp);
+                                    th_min = t;
+                                    fp_min = fp;
+                                } else {
+                                    th_min = MAX_TH;
+                                    for(int i = 0; i < 7; i++) {
+                                        set_a(i);
+                                        float t;
+                                        vec3 fp;
+                                        vec4 clr = general_quadrics(i, v2, vup, pc[i], pe, npe, insides[i], t, fp);
+                                        if (t < th_min) {
+                                            th_min = t;
+                                            fp_min = fp;
+                                            eta_min = etas[i];
+                                            pc_min = pc[i];
+                                            color_min = clr;
+                                            obj_intersected = i;
+                                        }
+                                    }
+                                    if (th_min == MAX_TH) {
+                                        gl_FragColor = color_min;
+                                        return;
+                                    }
+                                }
+                            }
+
+                        } else {
+                            // hit opaque object
+                            if(in_shadow(pe, obj_intersected))
+                                color_min = vec4(color_min.rgb * shadow_intensity, 1.);
+                            gl_FragColor = color_min;
+                            return;
+                        }
+
+                    }
+
+                    th_min = MAX_TH;
+                    for(int i = 0; i < 7; i++) {
+                        if (isReflective(i) || isTransparent(i))
+                            continue;
+                        set_a(i);
+                        float t;
+                        vec3 fp;
+                        vec4 clr = general_quadrics(i, v2, vup, pc[i], pe, npe, insides[i], t, fp);
+                        if (t < th_min) {
+                            th_min = t;
+                            color_min = clr;
+                            obj_intersected = i;
+                        }
+                    }
+                    if (th_min == MAX_TH)
+                        gl_FragColor = defaultColor;
+                    else {
+                        if(in_shadow(pe + th_min * npe, obj_intersected))
+                            color_min = vec4(color_min.rgb * shadow_intensity, 1.);
+                        gl_FragColor = color_min;
+                    }
+                } else {
+                    if(in_shadow(pe + th_min * npe, obj_intersected))
+                        color_min = vec4(color_min.rgb * shadow_intensity, 1.);
+                    gl_FragColor = color_min;
+                }
+            }
         }
     </script>
 
