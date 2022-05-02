@@ -21,8 +21,8 @@ pointLightDis[0] = 0.5;
 var pointLightDecay = [];
 pointLightDecay[0] = 0.1;
 
-var pointLightSpec = [];
-pointLightSpec[0] = 1.0;
+var pointLightSpec = 1.0;
+// pointLightSpec[0] = 1.0;
 
 var showDiffuse = [];
 showDiffuse[0] = 1;
@@ -33,6 +33,8 @@ showSpec[0] = 1;
 
 var styleBright,
     styleDark;
+
+var reflectNoise;
 
 var alphaR;
 var alphaG;
@@ -54,6 +56,8 @@ var fresnelIntensity;
 var fresnelB; //cos = 0.95
 var fresnelC; //cos = 0.7
 var checkFresnel;
+var checkFake;
+var checkRs;
 
 function initParameters() {
     lightColor[0] = [1.0, 1.0, 1.0];
@@ -61,7 +65,7 @@ function initParameters() {
     lightIntensity[0] = 1.0;
     pointLightDis[0] = 0.5;
     pointLightDecay[0] = 0.0;
-    pointLightSpec[0] = 1.0;
+    pointLightSpec = 1.0;
 
     showDiffuse[0] = 1;
     showSpec[0] = 1;
@@ -70,14 +74,16 @@ function initParameters() {
     styleBright = 0;
     styleDark = 1;
 
+    reflectNoise = 0;
+
     //highlight parameters
     //highlightA = 0.5;
     //highlightB = 0.25;
 
     //Diffuse Alpha parameters
-    alphaR = 1;
-    alphaG = 1;
-    alphaB = 1;
+    alphaR = 0.5;
+    alphaG = 0.5;
+    alphaB = 0.5;
 
     //refraction parameters
     logIOR = 0.25;//[-1, 1]
@@ -92,11 +98,12 @@ function initParameters() {
     FGscaleY = 0.5;
 
     //Fresnel parameters
-    fresnelIntensity = 0;
+    fresnelIntensity = 0.0;
     fresnelB = 0.3; //cos = 0.95
     fresnelC = 0.6; //cos = 0.7
     checkFresnel = 0;
-
+    checkFake = 0;
+    checkRs = 0;
     // Height Light parameters
     //hLightDistance = 1.0;
     //hLightIntensity = 1.0;
@@ -122,6 +129,9 @@ var showDiffuseLoc;
 var showSpecLoc;
 
 var styleBrightLoc, styleDarkLoc;
+var reflectNoiseLoc;
+
+
 var alphaRLoc, alphaGLoc, alphaBLoc;
 var logIORLoc, BGdisLoc;
 var FGdisLoc;
@@ -131,6 +141,8 @@ var FGshiftXLoc, FGshiftYLoc, FGscaleXLoc, FGscaleXLoc;
 var fresnelIntensityLoc;
 var fresnelBLoc, fresnelCLoc;
 var checkFresnelLoc;
+var checkFakeLoc;
+var checkRsLoc;
 
 
 /****************** For Basic shader ******************/
@@ -330,6 +342,9 @@ window.onload = function init() {
 
     styleBrightLoc = gl.getUniformLocation(program, "styleBright");
     styleDarkLoc = gl.getUniformLocation(program, "styleDark");
+    reflectNoiseLoc = gl.getUniformLocation(program, "reflectNoise");
+
+
     alphaRLoc = gl.getUniformLocation(program, "alphaR");
     alphaGLoc = gl.getUniformLocation(program, "alphaG");
     alphaBLoc = gl.getUniformLocation(program, "alphaB");
@@ -346,6 +361,8 @@ window.onload = function init() {
     fresnelBLoc = gl.getUniformLocation(program, "fresnelB");
     fresnelCLoc = gl.getUniformLocation(program, "fresnelC");
     checkFresnelLoc = gl.getUniformLocation(program, "checkFresnel");
+    checkFakeLoc = gl.getUniformLocation(program, "checkFake");
+    checkRsLoc = gl.getUniformLocation(program, "checkRs");
 
     render();
 };
@@ -398,6 +415,12 @@ function render() {
     var checkFresnelElem = $('#checkFresnelSelect:checked');
     checkFresnel = (checkFresnelElem.val()) ? 1 : 0;
 
+    var checkFakeElem = $('#checkFakeSelect:checked');
+    checkFake = (checkFakeElem.val()) ? 1 : 0;
+
+    var checkRsElem = $('#checkRsSelect:checked');
+    checkRs = (checkRsElem.val()) ? 1 : 0;
+
 
     for (var i = 0; i < lightNum; i++) {
         var checkboxName_showDiffuse = '#lightPanel' + i + ' #diffuseSelect:checked';
@@ -423,10 +446,13 @@ function render() {
     gl.uniform1iv(showSpecLoc, showSpec);
     gl.uniform1fv(pointLightDisLoc, pointLightDis);
     gl.uniform1fv(pointLightDecayLoc, pointLightDecay);
-    gl.uniform1fv(pointLightSpecLoc, pointLightSpec);
+    gl.uniform1f(pointLightSpecLoc, pointLightSpec);
 
     gl.uniform1f(styleBrightLoc, styleBright);
     gl.uniform1f(styleDarkLoc, styleDark);
+    gl.uniform1f(reflectNoiseLoc, reflectNoise);
+
+
     gl.uniform1f(alphaRLoc, alphaR);
     gl.uniform1f(alphaGLoc, alphaG);
     gl.uniform1f(alphaBLoc, alphaB);
@@ -444,6 +470,10 @@ function render() {
     gl.uniform1f(fresnelBLoc, fresnelB);
     gl.uniform1f(fresnelCLoc, fresnelC);
     gl.uniform1i(checkFresnelLoc, checkFresnel);
+
+    gl.uniform1i(checkFakeLoc, checkFake);
+    gl.uniform1i(checkRsLoc, checkRs);
+
 
     gl.drawArrays(gl.TRIANGLES, 0, numVertices);
 

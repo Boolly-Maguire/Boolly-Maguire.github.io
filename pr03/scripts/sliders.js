@@ -1,36 +1,46 @@
 $(document).ready(function () {
 
 
-    /**************** init checkbox according to default parameters ******************/
-
-    var lightsOnlyElem = $('#lightsOnlySelect');
-    initCheckbox(lightsOnly, lightsOnlyElem);
-
-    var lightsPositionElem = $('#lightsPositionSelect');
-    initCheckbox(lightsPosition, lightsPositionElem);
-
-    var checkFresnelElem = $('#checkFresnelSelect');
-    initCheckbox(checkFresnel, checkFresnelElem);
-
-    var checkFakeElem = $('#checkFakeSelect');
-    initCheckbox(checkFake, checkFakeElem);
-
-    var checkRsElem = $('#checkRsSelect');
-    initCheckbox(checkRs, checkRsElem);
-
-
-    if (lightsPosition == 1) {
-        $('#lightPosition_container').css("display", "block");
-    } else {
-        $('#lightPosition_container').css("display", "none");
-    }
-
-
     /**********************offcanvas.lib********************/
     $('[data-toggle="offcanvas"]').click(function () {
         $('.row-offcanvas').toggleClass('active')
     });
 
+    var X_slider = $("#X_slider");
+    var light_X = $("#light_X");
+    X_slider.attr("data-slider-min", -1).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", lightX).attr("data-slider-tooltip", "hide").slider({});
+    bindSliderValParam(X_slider, light_X, "lightX");
+
+    var Y_slider = $("#Y_slider");
+    var light_Y = $("#light_Y");
+    Y_slider.attr("data-slider-min", -1).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", lightY).attr("data-slider-tooltip", "hide").slider({});
+    bindSliderValParam(Y_slider, light_Y, "lightY");
+
+    var Z_slider = $("#Z_slider");
+    var light_Z = $("#light_Z");
+    Z_slider.attr("data-slider-min", -1).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", lightZ).attr("data-slider-tooltip", "hide").slider({});
+    bindSliderValParam(Z_slider, light_Z, "lightZ");
+
+
+    var lightIntensity_silder = $("#lightIntensity_silder");
+    var light_Intensity = $("#lightIntensity");
+    lightIntensity_silder.attr("data-slider-min", 0).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", lightIntensity).attr("data-slider-tooltip", "hide").slider({});
+    bindSliderValParam(lightIntensity_silder, light_Intensity, "lightIntensity");
+
+    var Dir_X_slider = $("#Dir_X_slider");
+    var Dir_light_X = $("#Dir_light_X");
+    Dir_X_slider.attr("data-slider-min", -1).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", Dir_lightX).attr("data-slider-tooltip", "hide").slider({});
+    bindSliderValParam(Dir_X_slider, Dir_light_X, "Dir_lightX");
+
+    var Dir_Y_slider = $("#Dir_Y_slider");
+    var Dir_light_Y = $("#Dir_light_Y");
+    Dir_Y_slider.attr("data-slider-min", -1).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", Dir_lightY).attr("data-slider-tooltip", "hide").slider({});
+    bindSliderValParam(Dir_Y_slider, Dir_light_Y, "Dir_lightY");
+
+    var Dir_Z_slider = $("#Dir_Z_slider");
+    var Dir_light_Z = $("#Dir_light_Z");
+    Dir_Z_slider.attr("data-slider-min", -1).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", Dir_lightZ).attr("data-slider-tooltip", "hide").slider({});
+    bindSliderValParam(Dir_Z_slider, Dir_light_Z, "Dir_lightZ");
 
     /**********************SliderBar********************************/
 
@@ -41,152 +51,18 @@ $(document).ready(function () {
         styleDark = slideEvt.value[1];
     });
 
-
-    $("#noiseControl_slider").slider({min: 0, max: 0.1, value: reflectNoise, step: 0.001, focus: true});
-    $("#noiseControl_slider").on("slide", function (slideEvt) {
-        reflectNoise = slideEvt.value;
+    $("#specSharpness_slider").slider({min: 0.0, max: 1.0, value: [specSharpness, specBlurriness], step: 0.001, focus: true});
+    $("#specSharpness_slider").on("slide", function (slideEvt) {
+        specBlurriness = slideEvt.value[0];
+        specSharpness = slideEvt.value[1];
     });
 
-    $("#pointLGTspec_slider").slider({min: 0, max: 1.0, value: pointLightSpec, step: 0.001, focus: true});
-    $("#pointLGTspec_slider").on("slide", function (slideEvt) {
-        pointLightSpec = slideEvt.value;
-    });
+    /*********************CheckBox**********************************/
+    var checkAreaLightElem = $('#checkAreaLightSelect');
+    initCheckbox(checkAreaLight, checkAreaLightElem);
 
-    /**Alpha**/
-
-    var alphaInRed_slider = $("#alphaInRed_slider");
-    var alphaInRed_val = $("#alphaInRed_val");
-    alphaInRed_slider.attr("data-slider-min", 0).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", alphaR).attr("data-slider-tooltip", "hide").slider({});
-    bindSliderValParam(alphaInRed_slider, alphaInRed_val, "alphaR");
-
-    var alphaInGreen_slider = $("#alphaInGreen_slider");
-    var alphaInGreen_val = $("#alphaInGreen_val");
-    alphaInGreen_slider.attr("data-slider-min", 0).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", alphaG).attr("data-slider-tooltip", "hide").slider({});
-    bindSliderValParam(alphaInGreen_slider, alphaInGreen_val, "alphaG");
-
-    var alphaInBlue_slider = $("#alphaInBlue_slider");
-    var alphaInBlue_val = $("#alphaInBlue_val");
-    alphaInBlue_slider.attr("data-slider-min", 0).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", alphaB).attr("data-slider-tooltip", "hide").slider({});
-    bindSliderValParam(alphaInBlue_slider, alphaInBlue_val, "alphaB");
-
-
-    /**Shadow**/
-    $("#sha_sampleSize_slider").slider({min: 0, max: 1, value: 1, step: 0.01, focus: true});
-    $("#sha_numberOfSample_slider").slider({min: 0, max: 1, value: 1, step: 0.01, focus: true});
-
-
-    /**Ambient**/
-    $("#amb_sampleSize_slider").slider({min: 0, max: 1, value: 1, step: 0.01, focus: true});
-    $("#amb_numberOfSample_slider").slider({min: 0, max: 1, value: 1, step: 0.01, focus: true});
-
-
-    /**Refraction**/
-
-    var refr_slider = $("#refraction_slider");
-    var refr_val = $("#refraction_val");
-    refr_slider.attr("data-slider-min", -1).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", logIOR).attr("data-slider-tooltip", "hide").slider({});
-    bindSliderValParam(refr_slider, refr_val, "logIOR");
-
-    var refr_BGdis_slider = $("#refr_BGdis_slider");
-    var refr_BGdis_val = $("#refr_BGdis_val");
-    refr_BGdis_slider.attr("data-slider-min", 0).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", BGdis).attr("data-slider-tooltip", "hide").slider({});
-    bindSliderValParam(refr_BGdis_slider, refr_BGdis_val, "BGdis");
-
-
-    /**Fresnel**/
-
-    var fresnel_intensity_slider = $("#fresnel_intensity_slider");
-    var fresnel_intensity_val = $("#fresnel_intensity_val");
-    fresnel_intensity_slider.attr("data-slider-min", -1).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", fresnelIntensity).attr("data-slider-tooltip", "hide").slider({});
-    bindSliderValParam(fresnel_intensity_slider, fresnel_intensity_val, "fresnelIntensity");
-
-    $("#fresnelControl_slider").slider({min: 0, max: 1, value: [fresnelB, fresnelC], step: 0.01, focus: true});
-    $("#fresnelControl_slider").on("slide", function (slideEvt) {
-        fresnelB = slideEvt.value[0];
-        fresnelC = slideEvt.value[1];
-    });
-
-
-    //$("#translucency_slider").slider({min: 0, max: 1, value: 1, step: 0.01, focus: true});
-
-    /**Reflection**/
-
-        //reflMap dropdown
-        //init
-    var way;
-    if (reflMap == 1) {
-        way = 'Plane ';
-    } else if (reflMap == 2) {
-        way = 'Hemisphere ';
-    }
-    var mystring = way + '<span class=\"caret\"></span>';
-    $("#reflMap .btn").html(mystring);
-
-
-    //events
-    $("#reflMap").on("hide.bs.dropdown", function () {
-        $("#reflMap .caret").removeClass("caret-up");
-    });
-    $("#reflMap").on("show.bs.dropdown", function () {
-        $("#reflMap .caret").addClass("caret-up");
-    });
-
-    $("#reflMap_plane").click(function () {
-        $("#reflMap .btn").html('Plane <span class="caret"></span>');
-        reflMap = 1;
-    })
-    $("#reflMap_hemisphere").click(function () {
-        $("#reflMap .btn").html('Hemisphere <span class="caret"></span>');
-        reflMap = 2;
-    })
-
-
-    // $("#reflMap .btn").html('Hemisphere <span class="caret caret-up"></span>');
-
-
-    var refl_FGdis_slider = $("#refl_FGdis_slider");
-    var refl_FGdis_val = $("#refl_FGdis_val");
-    refl_FGdis_slider.attr("data-slider-min", 0).attr("data-slider-max", 5).attr("data-slider-step", 0.01).attr("data-slider-value", FGdis).attr("data-slider-tooltip", "hide").slider({});
-    bindSliderValParam(refl_FGdis_slider, refl_FGdis_val, "FGdis");
-
-
-    var refl_FGshiftX_slider = $("#refl_FGshiftX_slider");
-    var refl_FGshiftX_val = $("#refl_FGshiftX_val");
-    refl_FGshiftX_slider.attr("data-slider-min", -1).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", FGshiftX).attr("data-slider-tooltip", "hide").slider({});
-    bindSliderValParam(refl_FGshiftX_slider, refl_FGshiftX_val, "FGshiftX");
-
-    var refl_FGshiftY_slider = $("#refl_FGshiftY_slider");
-    var refl_FGshiftY_val = $("#refl_FGshiftY_val");
-    refl_FGshiftY_slider.attr("data-slider-min", -1).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", FGshiftY).attr("data-slider-tooltip", "hide").slider({});
-    bindSliderValParam(refl_FGshiftY_slider, refl_FGshiftY_val, "FGshiftY");
-
-    var refl_FGscaleX_slider = $("#refl_FGscaleX_slider");
-    var refl_FGscaleX_val = $("#refl_FGscaleX_val");
-    refl_FGscaleX_slider.attr("data-slider-min", 0).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", FGscaleX).attr("data-slider-tooltip", "hide").slider({});
-    bindSliderValParam(refl_FGscaleX_slider, refl_FGscaleX_val, "FGscaleX");
-
-    var refl_FGscaleY_slider = $("#refl_FGscaleY_slider");
-    var refl_FGscaleY_val = $("#refl_FGscaleY_val");
-    refl_FGscaleY_slider.attr("data-slider-min", 0).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", FGscaleY).attr("data-slider-tooltip", "hide").slider({});
-    bindSliderValParam(refl_FGscaleY_slider, refl_FGscaleY_val, "FGscaleY");
-
-
-    $("#bluriness_slider").slider({min: 0, max: 1, value: 1, step: 0.01, focus: true});
-
-
-    /*Quality**/
-    $("#smQuality_slider").slider({min: 0, max: 1, value: 1, step: 0.01, focus: true});
-
-
-    //collapse list +/- toggle
-    /*
-     $(".myControlTitle collapsed").on("hide.bs.collapse", function(){
-        $(".btn").html('<span class="glyphicon glyphicon-collapse-down"></span> Open');
-      });
-      $("#demo").on("show.bs.collapse", function(){
-        $(".btn").html('<span class="glyphicon glyphicon-collapse-up"></span> Close');
-    */
-
+    var checkDirectionalLightElem = $('#checkDirectionalLightSelect');
+    initCheckbox(checkDirectionalLight, checkDirectionalLightElem);
 
 });//end of $(document).ready
 
@@ -202,51 +78,6 @@ function setupLightFunctions(i) {
     }).on('hidden.bs.collapse', function () {
         currentLight = null;
     })
-
-    /////init checkbox
-
-    //lightOn
-    var checkboxName_showDiffuse = '#lightPanel' + i + ' #diffuseSelect';
-    var showDiffuseElem = $(checkboxName_showDiffuse);
-    initCheckbox(showDiffuse[i], showDiffuseElem);
-
-    var checkboxName_showSpec = '#lightPanel' + i + ' #specSelect';
-    var showSpecElem = $(checkboxName_showSpec);
-    initCheckbox(showSpec[i], showSpecElem);
-
-    //////slider events
-
-    //lightIntensity
-    var sliderName_intensity = "#lightPanel" + i + " #intensity_slider";
-    var textareaName_intensity = "#lightPanel" + i + " #intensity_val";
-    var lightIntensity_slider = $(sliderName_intensity);
-    var lightIntensity_val = $(textareaName_intensity);
-    lightIntensity_slider.attr("data-slider-min", 0).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", lightIntensity[i]).attr("data-slider-tooltip", "hide").slider({});
-    bindSliderValParamIndex(lightIntensity_slider, lightIntensity_val, "lightIntensity", i);
-
-    //pointLightDis
-    var sliderName_pLightDis = "#lightPanel" + i + " #pointLGTdis_slider";
-    var textarea_pLightDis = "#lightPanel" + i + " #pointLGTdis_val";
-    var pointLGTdis_slider = $(sliderName_pLightDis);
-    var pointLGTdis_val = $(textarea_pLightDis);
-    pointLGTdis_slider.attr("data-slider-min", 0).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", pointLightDis[i]).attr("data-slider-tooltip", "hide").slider({});
-    bindSliderValParamIndex(pointLGTdis_slider, pointLGTdis_val, "pointLightDis", i);
-
-    //pointLightDecay
-    var sliderName_pLightDecay = "#lightPanel" + i + " #pointLGTdecay_slider";
-    var textarea_pLightDecay = "#lightPanel" + i + " #pointLGTdecay_val";
-    var pointLGTdecay_slider = $(sliderName_pLightDecay);
-    var pointLGTdecay_val = $(textarea_pLightDecay);
-    pointLGTdecay_slider.attr("data-slider-min", 0).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", pointLightDecay[i]).attr("data-slider-tooltip", "hide").slider({});
-    bindSliderValParamIndex(pointLGTdecay_slider, pointLGTdecay_val, "pointLightDecay", i);
-
-
-    // var sliderName_pLightSpec = "#lightPanel" + i + " #pointLGTspec_slider";
-    // var textarea_pLightSpec = "#lightPanel" + i + " #pointLGTspec_val";
-    // var pointLGTspec_slider = $(sliderName_pLightSpec);
-    // var pointLGTspec_val = $(textarea_pLightSpec);
-    // pointLGTspec_slider.attr("data-slider-min", 0).attr("data-slider-max", 1).attr("data-slider-step", 0.01).attr("data-slider-value", pointLightSpec).attr("data-slider-tooltip", "hide").slider({});
-    // bindSliderValParamIndex(pointLGTspec_slider, pointLGTspec_val, "pointLightSpec", i);
 
 
     ////init colorPicker & add events
@@ -265,7 +96,6 @@ function setupLightFunctions(i) {
                 for (var i = 0; i < lightNum; i++) {
                     if (currentLight == i) {
                         lightColor[i] = [rgbObject.r / 255, rgbObject.g / 255, rgbObject.b / 255];
-                        setLightMarkFill(i); //function in addLights.lib
                     }
                 }
                 //add event: add border if it is white#ffffff;

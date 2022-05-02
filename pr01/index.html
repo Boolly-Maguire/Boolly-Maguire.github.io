@@ -88,7 +88,7 @@
         uniform vec3 lightColor[max_lights];
         uniform float lightIntensity[max_lights];
         uniform float pointLightDecay[max_lights];
-        uniform float pointLightSpec[max_lights];
+        uniform float pointLightSpec;
 
         uniform bool showDiffuse[max_lights];
         uniform bool showSpec[max_lights];
@@ -109,6 +109,12 @@
         uniform float fresnelB;
         uniform float fresnelC;
         uniform bool checkFresnel;
+
+        uniform bool checkFake;
+        uniform bool checkRs;
+
+        uniform float reflectNoise;
+
 
         vec4 normal() {
             vec4 normalMap = texture2D(uSamplerNormal, vec2(f_texcoord.s, f_texcoord.t));
@@ -182,7 +188,7 @@
                         if (temp < 0.0)
                         temp = 0.0;
                         float spec = pow(temp, 200.0);
-                        finalSpec += specColor * spec * pointLightSpec[i];
+                        finalSpec += specColor * spec * pointLightSpec;
                     }
                 } else {
                     break;
@@ -193,11 +199,11 @@
         }
 
         //Reflected texture is treated as ultimate plane.
-        vec3 reflect1(vec3 n) {
+        vec3 reflect1(vec3 n, float noise1, float noise2, float reflectIntensity) {
 
-            float reflectIntensity = 1.0;
             vec3 reflect = - 1.0 * vec3(0.0, 0.0, 1.0) + 2.0 * dot(n, vec3(0.0, 0.0, 1.0)) * n;
-            vec2 reflCoord = f_texcoord + (reflect.xy / reflect.z) * FGdis + vec2(-mouseXYcopy.x * 0.5, mouseXYcopy.y * 0.5);//+ vLight0.xy ;
+
+            vec2 reflCoord = f_texcoord + (reflect.xy / reflect.z) * FGdis + vec2(-mouseXYcopy.x * 0.5, mouseXYcopy.y * 0.5) + vec2(noise1, noise2);
             vec2 v = (reflCoord - vec2(0.5, 0.5)) / 0.5;
             reflCoord.x = v.x * (1.0 - FGscaleX) - FGshiftX + 0.5;
             reflCoord.y = v.y * (1.0 - FGscaleY) - FGshiftY + 0.5;
@@ -272,10 +278,9 @@
 
         // Reflected texture is treated as if it is on a hemisphere 1 unit
         // away from the surface.
-        vec3 reflect2(vec3 n) {
+        vec3 reflect2(vec3 n, float noise1, float noise2, float reflectIntensity) {
 
-            float reflectIntensity = 1.0;
-            vec2 reflCoord = f_texcoord + n.xy / n.z * FGdis + vec2(-mouseXYcopy.x * 0.5, mouseXYcopy.y * 0.5);
+            vec2 reflCoord = f_texcoord + n.xy / n.z * FGdis + vec2(-mouseXYcopy.x * 0.5, mouseXYcopy.y * 0.5) + vec2(noise1, noise2);
             vec2 v = (reflCoord - vec2(0.5, 0.5)) / 0.5;
             reflCoord.x = v.x * (1.0 - FGscaleX) - FGshiftX + 0.5;
             reflCoord.y = v.y * (1.0 - FGscaleY) - FGshiftY + 0.5;
@@ -384,6 +389,45 @@
 
         }
 
+
+
+        vec3 fresnelBlend2(vec3 n, vec3 refl, vec3 refr) {
+            float cos = dot(n, vec3(0, 0, 1.0));
+            float ior = pow(2.0, logIOR);
+//            float ior = logIOR;
+            ior = 1.0 / ior;
+
+            float square = 1.0 - ior * ior * (1.0 - cos * cos);
+            if (square < 0.0) {
+                square = 0.0;
+            }
+
+            float rs = (ior * cos - square) / (ior * cos + square);
+            rs = rs * rs;
+
+            float rp = (ior * square - cos) / (ior * square + cos);
+            rp = rp * rp;
+
+
+            float fresnel = (rs + rp) / 2.0;
+
+
+            if (fresnelIntensity > 0.0) {
+                fresnel = 1.0 * fresnelIntensity + fresnel * (1.0 - fresnelIntensity);
+                return refl * fresnel + refr * (1.0 - fresnel);
+            } else {
+                fresnel = fresnel * (1.0 + fresnelIntensity);
+                return refl * fresnel + refr * (1.0 - fresnel);
+            }
+
+
+            //vec3 reflTemp = refl * reflectIntensity ;
+            //vec3 refrTemp = refr * (1.0 - reflectIntensity);
+            //return reflTemp * (1.0 - cos) + refrTemp * cos;
+
+
+        }
+
         void main() {
 
             vec4 nn = normal();
@@ -395,20 +439,38 @@
             vec4 background = texture2D(uSamplerBackground, vec2(f_texcoord.s, f_texcoord.t));
             vec3 backgroundColor = background.rgb;
             vec3 refl = vec3 (0, 0, 0);
+
             if (reflMap == 1) {
-                refl = reflect1(n) + specular;//plane
+                for (int i = 0; i < 10; i++) {
+                    for (int j = 0; j < 10; j ++) {
+                        refl += reflect1(n, float(i) * reflectNoise * 2.0 / 10.0 - reflectNoise, float(j) * reflectNoise * 2.0 / 10.0 - reflectNoise, 0.01);
+                    }
+                }
+                refl += specular;
                 if (checkFresnel) {
-                    refl = reflect1(n);
+                    refl = reflect1(n, 0.0, 0.0, 1.0);
                 }
             } else if (reflMap == 2) {
-                refl = reflect2(n) + specular;//hemisphere
+                for (int i = 0; i < 10; i++) {
+                    for (int j = 0; j < 10; j++) {
+                        refl += reflect1(n, float(i) * reflectNoise * 2.0 / 10.0 - reflectNoise, float(j) * reflectNoise * 2.0 / 10.0 - reflectNoise, 0.01);
+                    }
+                }
+                refl += specular;//hemisphere
                 if (checkFresnel) {
-                    refl = reflect2(n);
+                    refl = reflect2(n, 0.0, 0.0, 1.0);
                 }
             }
-            vec3 refr = refract(n);
 
-            vec3 fresnel = fresnelBlend(n, refl, refr);
+            vec3 refr;
+            vec3 fresnel;
+            if (checkFake) {
+                refr = refract2(n);
+                fresnel = fresnelBlend2(n, refl, refr);
+            } else {
+                refr = refract(n);
+                fresnel = fresnelBlend(n, refl, refr);
+            }
 
             vec4 finalColor = diffuse;
 
@@ -462,10 +524,10 @@
             /*
                         vec2 v0 = f_texcoord - mouseXY0;
                         vec3 NewNormal;
-                         NewNormal = vec3(v0.xy, sqrt(1.0 - length(v0)/(0.1*0.1)));
+                        NewNormal = vec3(v0.xy, sqrt(1.0 - length(v0)/(0.1*0.1)));
 
                         vec3 Newrefr = refract(NewNormal);
-                        gl_FragColor = vec4(refr,1.0);
+                        gl_FragColor = vec4(refr, 1.0);
             */
 
             /*
@@ -506,35 +568,29 @@
 
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Dropdown button
+                    Dropdown (Please hit this button again after selection)
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
 
-                    <button class="main_button btn btn-block btn-mycustom dropdown-item">Fence</button>
-
                     <button class="main_button btn btn-block btn-mycustom dropdown-item">EscherSphere</button>
 
-                    <button class="main_button btn btn-block btn-mycustom dropdown-item">Bottle</button>
+                    <button class="main_button btn btn-block btn-mycustom dropdown-item">Yuchao Lin (1)</button>
 
-                    <button class="main_button btn btn-block btn-mycustom dropdown-item">JarTable</button>
+                    <button class="main_button btn btn-block btn-mycustom dropdown-item">Yuchao Lin (2)</button>
 
-                    <button class="main_button btn btn-block btn-mycustom dropdown-item">Picasso Self-Portrait</button>
+                    <button class="main_button btn btn-block btn-mycustom dropdown-item">Yuchao Lin (3)</button>
 
-                    <button class="main_button btn btn-block btn-mycustom dropdown-item">Picasso Dora Maar</button>
+                    <button class="main_button btn btn-block btn-mycustom dropdown-item">Hongyi Ling (1)</button>
 
-                    <button class="main_button btn btn-block btn-mycustom dropdown-item">Modigliani</button>
+                    <button class="main_button btn btn-block btn-mycustom dropdown-item">Hongyi Ling (2)</button>
 
-                    <button class="main_button btn btn-block btn-mycustom dropdown-item">Picasso Self-Portrait Soft
-                    </button>
+                    <button class="main_button btn btn-block btn-mycustom dropdown-item">Hongyi Ling (3)</button>
+                    
+                    <button class="main_button btn btn-block btn-mycustom dropdown-item">Varda - Glass</button>
 
-                    <button class="main_button btn btn-block btn-mycustom dropdown-item">Picasso Dora Maar Soft</button>
+                    <button class="main_button btn btn-block btn-mycustom dropdown-item">Varda - Multi Pane Window</button>
 
-                    <button class="main_button btn btn-block btn-mycustom dropdown-item">Modigliani Soft</button>
-
-                    <button class="main_button btn btn-block btn-mycustom dropdown-item">Holmer</button>
-
-                    <button class="main_button btn btn-block btn-mycustom dropdown-item">EscherEye</button>
-
+                    <button class="main_button btn btn-block btn-mycustom dropdown-item">Varda - Sphere</button>
 
                     <div class="clearfix"></div>
                 </div>
@@ -597,12 +653,31 @@
                         <div>
                             <h6>Style Control</h6>
                             <div class="slider_box">
-                                <input id="styleControl_slider" data-slider-id='customSlider' type="text" class=" span2"
+                                <input id="styleControl_slider" data-slider-id='customSlider' type="text" class="span2"
                                        value=""/>
                             </div>
                             <div>
                                 <div class="h7 inlineBlock">Bright</div>
                                 <div class="h7 pull-right">Dark</div>
+                            </div>
+                            <div class="slider_box">
+                                <input id="noiseControl_slider" data-slider-id='customSlider' type="text" class="span2"
+                                       value=""/>
+                            </div>
+                            <div>
+                                <div class="h7 inlineBlock">Blurring</div>
+                                <div class="h7 pull-right"></div>
+
+                            </div>
+
+                            <div class="slider_box">
+                                <input id="pointLGTspec_slider" data-slider-id='customSlider' type="text" class="span2"
+                                       value=""/>
+                            </div>
+                            <div>
+                                <div class="h7 inlineBlock">Translucency</div>
+                                <div class="h7 pull-right"></div>
+
                             </div>
                         </div>
                     </div>
@@ -817,6 +892,24 @@
                                             </div>
                                         </label>
                                     </div>
+                                    <div class="checkbox">
+                                        <label>
+                                            <span class="h6 inlineBlock"> True Refraction </span>
+                                            <div class="checkbox_container pull-right">
+                                                <input type="checkbox" id="checkFakeSelect">
+                                                <div class="pseudoCheckbox"></div>
+                                            </div>
+                                        </label>
+                                    </div>
+<!--                                    <div class="checkbox">-->
+<!--                                        <label>-->
+<!--                                            <span class="h6 inlineBlock"> Rs (else Rp) </span>-->
+<!--                                            <div class="checkbox_container pull-right">-->
+<!--                                                <input type="checkbox" id="checkRsSelect">-->
+<!--                                                <div class="pseudoCheckbox"></div>-->
+<!--                                            </div>-->
+<!--                                        </label>-->
+<!--                                    </div>-->
                                     <div>
                                         <span class="h6 inlineBlock"> Fresnel Control </span>
                                         <div class="pull-right">
@@ -1068,15 +1161,15 @@
                     <input id="pointLGTdecay_slider" data-slider-id='customSlider' type="text"/>
                 </div>
             </div>
-            <div class="slider_container">
-                <span class="h6 inlineBlock"> Specular Control</span>
-                <div class="pull-right">
-                    <input type="text" class="form-control mytextbox text-center" id="pointLGTspec_val">
-                </div>
-                <div class="slider_box">
-                    <input id="pointLGTspec_slider" data-slider-id='customSlider' type="text"/>
-                </div>
-            </div>
+<!--            <div class="slider_container">-->
+<!--                <span class="h6 inlineBlock"> Specular Control</span>-->
+<!--                <div class="pull-right">-->
+<!--                    <input type="text" class="form-control mytextbox text-center" id="pointLGTspec_val">-->
+<!--                </div>-->
+<!--                <div class="slider_box">-->
+<!--                    <input id="pointLGTspec_slider" data-slider-id='customSlider' type="text"/>-->
+<!--                </div>-->
+<!--            </div>-->
 
         </div>
     </li>

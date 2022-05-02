@@ -38,9 +38,6 @@ $(function () {
                 }
 
                 lightColor[data.lastID] = [r / 255.0, g / 255.0, b / 255.0];
-                setLightMarkFill(data.lastID);
-
-                moveLightMarkPosition([0.1, 0.1], data.lastID);
                 view.render();
             }, "10");
         },
@@ -93,16 +90,7 @@ $(function () {
             });
             return ExistLights;
         },
-        /*
-                thisLightExist: function(light){
-                    if( data.lights[ light.id - 1 ].Exist == true)
-                    {
-                        return true;
-                    }else{
-                        return false;
-                    }
-                },
-        */
+
         init: function () {
             view.init();
         }
@@ -121,6 +109,10 @@ $(function () {
             }, false);
             canvas.addEventListener("touchstart", function (evt) {
                 mouseFlag = 1;
+            }, false);
+
+            canvas.addEventListener("wheel", function (evt) {
+                coordZ += evt.deltaY / 5000.0;
             }, false);
 
             document.addEventListener("mousemove", function (evt) {
@@ -201,7 +193,6 @@ $(function () {
 
             //for default light
             setupLightFunctions(0);
-            drawLightMarkPosition(0);
 
             octopus.getExistLights().forEach(function (light) {
 
@@ -209,7 +200,6 @@ $(function () {
                 var thisTemplate = lightTemplate.replace(/{{id}}/g, light.id);
                 $lightList.append(thisTemplate);
                 setupLightFunctions(light.id);
-                drawLightMarkPosition(light.id);
             });
 
 
@@ -233,37 +223,9 @@ $(function () {
 }());
 
 
-function moveLightMarkPosition(dir, index) {
-    var lightMarkName = '#lightMark' + index;
-    var posx = $(lightMarkName).attr('cx')
-    posx = posx.substr(0, posx.length - 1)
-    var posy = $(lightMarkName).attr('cy')
-    posy = posy.substr(0, posy.length - 1)
-
-    console.log("light pos:", posx, posy);
-
-    var lightPx = Number(posx) + dir[0]
-    var lightPy = Number(posy) + dir[1]
-
-    mouseXY[index][0] = lightPx / 100 - 0.5;
-    mouseXY[index][1] = lightPy / 100 - 0.5;
-
-    console.log("light pos after change:", lightPx, lightPy);
-
-    lightPx = lightPx + "%"
-    lightPy = lightPy + "%"
-    $(lightMarkName).attr('cx', lightPx).attr('cy', lightPy);
-}
-
 function addLightParameters(index) {
     //init parameter
-    mouseXY[index] = [Math.random() - 0.5, Math.random() - 0.5];
     lightColor[index] = [Math.random(), Math.random(), Math.random()];
-    lightIntensity[index] = 0.5;
-    pointLightDis[index] = 0.5;
-    pointLightDecay[index] = 0.1;
-    showDiffuse[index] = 1;
-    showSpec[index] = 1;
 
     //mouse 
     var canvas = document.getElementById("gl-canvas");
@@ -280,52 +242,15 @@ function addLightParameters(index) {
 
 }
 
-
-//for show lights position
-
-function setLightMarkFill(index) {
-    var colorString = color2hex(lightColor[index]);
-    var lightMarkName = '#lightMark' + index;
-    $(lightMarkName).attr('fill', colorString);
-}
-
-function setLightMarkPosition(index) {
-
-    var lightPx = (mouseXY[index][0] + 0.5) * 100 + "%";
-    var lightPy = (mouseXY[index][1] + 0.5) * 100 + "%";
-
-    var lightMarkName = '#lightMark' + index;
-    $(lightMarkName).attr('cx', lightPx).attr('cy', lightPy);
-}
-
-
-function drawLightMarkPosition(index) {
-    var lightPx = (mouseXY[index][0] + 0.5) * 100 + "%";
-    var lightPy = (mouseXY[index][1] + 0.5) * 100 + "%";
-    var colorString = color2hex(lightColor[index]);
-    var lightMark = "lightMark" + index;
-    var circle = makeSVG('circle', {id: lightMark, cx: lightPx, cy: lightPy, fill: colorString, r: 8});//, stroke: 'white', 'stroke-width': 1
-    document.getElementById('lightPosition_container').appendChild(circle);
-}
-
-function makeSVG(tag, attrs) {
-    var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
-    for (var k in attrs)
-        el.setAttribute(k, attrs[k]);
-    return el;
-}
-
 //mouse functions
 
 function setMousePos(canvas, evt, i) {
-    var rect = canvas.getBoundingClientRect();
+    // var rect = canvas.getBoundingClientRect();
 
-    if (currentLight == i) {
-        mouseXY[i][0] = getMousePos(canvas, evt).x;
-        mouseXY[i][1] = getMousePos(canvas, evt).y;
-        setLightMarkPosition(i);
-        console.log(i + ": " + mouseXY[i][0] + " " + mouseXY[i][1]);
-    }
+    // if (currentLight == i) {
+        coordX = getMousePos(canvas, evt).x;
+        coordY = getMousePos(canvas, evt).y;
+    // }
 
 }
 

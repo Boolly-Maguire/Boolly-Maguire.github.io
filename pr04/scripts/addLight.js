@@ -111,6 +111,10 @@ $(function () {
                 mouseFlag = 1;
             }, false);
 
+            canvas.addEventListener("wheel", function (evt) {
+                coordZ += evt.deltaY / 5000.0;
+            }, false);
+
             document.addEventListener("mousemove", function (evt) {
                 if (mouseFlag === 1) {
                     setMousePos(canvas, evt, 0);//add default light event;
@@ -241,12 +245,12 @@ function addLightParameters(index) {
 //mouse functions
 
 function setMousePos(canvas, evt, i) {
-    var rect = canvas.getBoundingClientRect();
+    // var rect = canvas.getBoundingClientRect();
 
-    if (currentLight == i) {
+    // if (currentLight == i) {
         coordX = getMousePos(canvas, evt).x;
         coordY = getMousePos(canvas, evt).y;
-    }
+    // }
 
 }
 

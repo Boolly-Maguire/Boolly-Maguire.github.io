@@ -1,4 +1,4 @@
-var image1, image2;
+var image1, image2, randomImage;
 // init vars
 var $container1 = $('#container1'),
     $container2 = $('#container2');
@@ -9,11 +9,12 @@ UPLOADinit = function () {
 
     image1 = new Image();
     image2 = new Image();
-
+    randomImage = new Image();
     initParameters();
 
-    image1.src = "images/img.jpg"; //dark
-    image2.src = "images/trees.jpg"
+    image1.src = "images/stars.jpg"; //dark
+    image2.src = "images/base.jpg";
+    randomImage.src = "images/rgb_noise.bmp";
     //load default images in thumb
 
     initDefaultThumbImgSize(image1);

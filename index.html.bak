@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="index.css">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/3.6.95/css/materialdesignicons.css"
+          rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js" rel="script">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" rel="script">
+
+</head>
+<body>
+<div class="title">CSCE647 Group III</div>
+<div class="member">Grover Varda, Hongyi Ling, Yuchao Lin</div>
+
+<div class="main">
+    <div class="row">
+
+        <div class="col-md-4">
+            <div class="">
+                <div class="two">
+                    <div class="px-3 pt-3">
+                        <div class="name"><a class="btn-link name" href=pr01/index.html>Project 01</a></div>
+                        <p class="quote2">
+                            Contribution
+                        <ul class="ul2">
+                            <li>Fix color picker and adding light function</li>
+                            <li>Add light moving and color changing function</li>
+                            <li>Add function controling the area of specular highlight</li>
+                            <li>Add two more images</li>
+                        </ul>
+
+                        </p>
+                    </div>
+                    <div class="d-flex justify-content-between px-3 align-items-center pb-3">
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="pt-2">
+                <div class="two">
+                    <div class="px-3 pt-3">
+                        <div class="name"><a class="btn-link name" href=pr04/index.html>Project 04</a></div>
+                        <p class="quote2">
+                            Contribution
+                        <ul class="ul2">
+                            <li>Sphere</li>
+							<li>Camera and light</li>
+                        </ul>
+
+                        </p>
+                    </div>
+                    <div class="d-flex justify-content-between px-3 align-items-center pb-3">
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <div class="two">
+                    <div class="px-3 pt-3">
+                        <div class="name"><a class="btn-link name" href=pr07/index.html>Project 07</a></div>
+                        <p class="quote2">Contribution</p>
+                    </div>
+                    <div class="d-flex justify-content-between px-3 align-items-center pb-3">
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="pt-2">
+                <div class="two">
+                    <div class="px-3 pt-3">
+                        <div class="name"><a class="btn-link name" href=pr10/index.html>Project 10</a></div>
+                        <p class="quote2">Contribution</p>
+                    </div>
+                    <div class="d-flex justify-content-between px-3 align-items-center pb-3">
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <div class="two">
+                    <div class="px-3 pt-3">
+                        <div class="name"><a class="btn-link name" href=pr13/index.html>Project 13</a></div>
+                        <p class="quote2">Contribution</p>
+                    </div>
+                    <div class="d-flex justify-content-between px-3 align-items-center pb-3">
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+
+        <div class="col-md-4">
+            <div class="">
+                <div class="two">
+                    <div class="px-3 pt-3">
+                        <div class="name"><a class="btn-link name" href=pr02/index.html>Project 02</a></div>
+                        <p class="quote2">
+                            Contribution
+						<ul class="ul2">
+                            <li>Add reflection noise</li>
+                        </ul>
+                        </p>
+                    </div>
+                    <div class="d-flex justify-content-between px-3 align-items-center pb-3">
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="pt-2">
+                <div class="two">
+                    <div class="px-3 pt-3">
+                        <div class="name"><a class="btn-link name" href=pr05/index.html>Project 05</a></div>
+                        <p class="quote2">Contribution</p>
+                    </div>
+                    <div class="d-flex justify-content-between px-3 align-items-center pb-3">
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <div class="two">
+                    <div class="px-3 pt-3">
+                        <div class="name"><a class="btn-link name" href=pr08/index.html>Project 08</a></div>
+                        <p class="quote2">Contribution</p>
+                    </div>
+                    <div class="d-flex justify-content-between px-3 align-items-center pb-3">
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <div class="two">
+                    <div class="px-3 pt-3">
+                        <div class="name"><a class="btn-link name" href=pr11/index.html>Project 11</a></div>
+                        <p class="quote2">Contribution</p>
+                    </div>
+                    <div class="d-flex justify-content-between px-3 align-items-center pb-3">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+            <div class="">
+                <div class="two">
+                    <div class="px-3 pt-3">
+                        <div class="name"><a class="btn-link name" href=pr03/index.html>Project 03</a></div>
+                        <p class="quote2">
+                            Contribution
+                        <ul class="ul2">
+                            <li>Add true refraction with fresnel</li>
+                        </ul>
+
+                        </p>
+                    </div>
+                    <div class="d-flex justify-content-between px-3 align-items-center pb-3">
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="pt-2">
+                <div class="two">
+                    <div class="px-3 pt-3">
+                        <div class="name"><a class="btn-link name" href=pr06/index.html>Project 06</a></div>
+                        <p class="quote2">Contribution</p>
+                    </div>
+                    <div class="d-flex justify-content-between px-3 align-items-center pb-3">
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <div class="two">
+                    <div class="px-3 pt-3">
+                        <div class="name"><a class="btn-link name" href=pr09/index.html>Project 09</a></div>
+                        <p class="quote2">Contribution</p>
+                    </div>
+                    <div class="d-flex justify-content-between px-3 align-items-center pb-3">
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <div class="two">
+                    <div class="px-3 pt-3">
+                        <div class="name"><a class="btn-link name" href=pr12/index.html>Project 12</a></div>
+                        <p class="quote2">Contribution</p>
+                    </div>
+                    <div class="d-flex justify-content-between px-3 align-items-center pb-3">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+</body>
+</html>

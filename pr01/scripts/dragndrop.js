@@ -189,7 +189,7 @@ sampleButtons = function () {
         }
 
 
-        if ($(this).text() === "Holmer") {
+        if ($(this).text() === "Yuchao Lin (1)") {
             initParameters();
 
             //Buddha
@@ -204,7 +204,7 @@ sampleButtons = function () {
 
         }
 
-        if ($(this).text() === "EscherEye") {
+        if ($(this).text() === "Yuchao Lin (2)") {
             initParameters();
 
             //Buddha
@@ -216,6 +216,105 @@ sampleButtons = function () {
             image5.src = linkPrefix + "images/Escher/eye/dark.jpg";  //refraction
             image6.src = linkPrefix + "images/Escher/eye/alphaControl.jpg"; //alpha
 
+
+        }
+
+        if ($(this).text() === "Yuchao Lin (3)") {
+            initParameters();
+
+            //Buddha
+            alphaR = 1.0;
+            image1.src = linkPrefix + "images/crossshade/dark.png";
+            image2.src = linkPrefix + "images/crossshade/dark.png";
+            image3.src = linkPrefix + "images/crossshade/shape.png"; //shape map
+            image4.src = linkPrefix + "images/dark.png";  //reflection
+            image5.src = linkPrefix + "images/dark.jpg";  //refraction
+            image6.src = linkPrefix + "images/white.png"; //alpha
+
+
+        }
+
+        if ($(this).text() === "Hongyi Ling (1)") {
+            initParameters();
+
+            //Buddha
+            alphaR = 1;
+            image1.src = linkPrefix + "images/girl/di0.png";//dark
+            image2.src = linkPrefix + "images/girl/di1.png";//bright
+            image3.src = linkPrefix + "images/girl/sm.png"; //shape map
+            image4.src = linkPrefix + "images/dark.png";  //reflection
+            image5.src = linkPrefix + "images/girl/bg3.jpg";  //refraction
+            image6.src = linkPrefix + "images/girl/sm.png"; //alpha
+
+
+        }
+
+        if ($(this).text() === "Hongyi Ling (2)") {
+            initParameters();
+
+            //Buddha
+            alphaR = 0.2;
+            image1.src = linkPrefix + "images/monalisa/DI0.png";//dark
+            image2.src = linkPrefix + "images/monalisa/DI1.png";//bright
+            image3.src = linkPrefix + "images/monalisa/SM.png"; //shape map
+            image4.src = linkPrefix + "images/bottle/bg.png";  //reflection
+            image5.src = linkPrefix + "images/dark.png";  //refraction
+            image6.src = linkPrefix + "images/white.png"; //alpha
+
+
+        }
+
+        if ($(this).text() === "Hongyi Ling (3)") {
+            initParameters();
+
+            //Buddha
+            alphaR = 1.0;
+            image1.src = linkPrefix + "images/Eye/eye_dark.png";
+            image2.src = linkPrefix + "images/Eye/eye_bright.png";
+            image3.src = linkPrefix + "images/Eye/eye_shape_smooth.png"; //shape map
+            image4.src = linkPrefix + "images/himlaya.png";  //reflection
+            image5.src = linkPrefix + "images/dark.jpg";  //refraction
+            image6.src = linkPrefix + "images/Eye/eye_alpha.jpg"; //alpha
+
+
+        }
+        
+        if ($(this).text() === "Varda - Glass") {
+            initParameters();
+
+            alphaR=0.0;
+            image1.src = linkPrefix + "images/varda/Glass_D.png";
+            image2.src = linkPrefix + "images/varda/Glass_L.png";
+            image3.src = linkPrefix + "images/varda/Glass_N.png"; //shape map
+            image4.src = linkPrefix + "images/varda/fish1.jpg";  //reflection
+            image5.src = linkPrefix + "images/white.png";  //refraction
+            image6.src = linkPrefix + "images/white.png"; //alpha
+
+        }
+        
+        if ($(this).text() === "Varda - Multi Pane Window") {
+            initParameters();
+
+            alphaR=0.0;
+            image1.src = linkPrefix + "images/varda/Window_D.jpg";
+            image2.src = linkPrefix + "images/varda/Window_L.jpg";
+            image3.src = linkPrefix + "images/varda/Window_N.jpg"; //shape map
+            image4.src = linkPrefix + "images/varda/sunflower.jpg";  //reflection
+            image5.src = linkPrefix + "images/varda/Window_D.jpg";  //refraction
+            image6.src = linkPrefix + "images/varda/Window_A.jpg"; //alpha
+
+        }
+
+        if ($(this).text() === "Varda - Sphere") {
+            initParameters();
+
+            alphaR=0.0;
+            image1.src = linkPrefix + "images/white.png";
+            image2.src = linkPrefix + "images/white.png";
+            image3.src = linkPrefix + "images/varda/Sphere_N.png"; //shape map
+            image4.src = linkPrefix + "images/varda/starry.jpg";  //reflection
+            image5.src = linkPrefix + "images/white.png";  //refraction
+            image6.src = linkPrefix + "images/reflect_red.png"; //alpha
 
         }
 
